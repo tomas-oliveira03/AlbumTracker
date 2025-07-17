@@ -1,0 +1,22 @@
+services:
+  album-tracker-service-db:
+    container_name: album-tracker-service-db
+    image: postgres:16-alpine
+    volumes: ['album-tracker-service-db-data:/var/lib/postgresql/data']
+    ports:
+      - '5201:5432'
+    restart: always
+    environment:
+      POSTGRES_DB: 'album-tracker-service'
+      POSTGRES_PASSWORD: 'album-tracker-service'
+      POSTGRES_USER: 'album-tracker-service'
+
+  album-tracker-service-redis:
+    container_name: album-tracker-service-redis
+    image: redis:6.2.6-alpine
+    ports:
+      - '6420:6379'
+    restart: always
+
+volumes:
+  album-tracker-service-db-data:
