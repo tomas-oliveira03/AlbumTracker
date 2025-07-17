@@ -23,6 +23,7 @@ class Envs {
 	public readonly FRONTEND_URL: string = this.getString('FRONTEND_URL', 'http://localhost:5173');
 	public readonly NODE_ENV: string = this.getString('NODE_ENV', EnvName.LOCAL);
 	public readonly SERVICE: string = this.getString('SERVICE', 'worker');
+	public readonly LOGDNA_KEY: string = this.getString('LOGDNA_KEY', '');
 
 	private constructor() {
 		if (this.NODE_ENV === EnvName.LOCAL) {
