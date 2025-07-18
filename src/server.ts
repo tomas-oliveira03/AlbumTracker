@@ -3,6 +3,7 @@ import { initializeDatabase } from "./db";
 // import tradeRouter from "./server/routers/trade";
 import { envs } from "./config";
 import { logger } from "./lib/logger";
+import apiRouter from "./server/routers";
 
 
 const app = express();
@@ -22,13 +23,8 @@ const startServer = async () => {
     // Middleware to parse JSON
     app.use(express.json());
 
-    // create a health check endpoint
-    app.get('/health', (_, res) => {
-      res.status(200).send('OK');
-    });
-
-
-    // app.use("/trade", tradeRouter);
+    // Mount API routes
+    app.use('/api', apiRouter);
 
     server = app.listen(envs.PORT, () => {
       logger.info(`Server is running at http://localhost:${envs.PORT}`);

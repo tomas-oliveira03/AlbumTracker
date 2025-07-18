@@ -25,6 +25,9 @@ class Envs {
 	public readonly SERVICE: string = this.getString('SERVICE', 'worker');
 	public readonly LOGDNA_KEY: string = this.getString('LOGDNA_KEY', '');
 
+	public readonly SPOTIFY_CLIENT_ID: string = this.getString('SPOTIFY_CLIENT_ID', '');
+	public readonly SPOTIFY_CLIENT_SECRET: string = this.getString('SPOTIFY_CLIENT_SECRET', '');
+
 	private constructor() {
 		if (this.NODE_ENV === EnvName.LOCAL) {
 			return
