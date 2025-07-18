@@ -4,10 +4,6 @@ import SpotifyWebApi from 'spotify-web-api-node';
 const clientId = envs.SPOTIFY_CLIENT_ID
 const clientSecret = envs.SPOTIFY_CLIENT_SECRET
 
-console.log(clientId)
-
-console.log(clientSecret)
-
 const spotifyApi = new SpotifyWebApi({
   clientId: clientId,
   clientSecret: clientSecret,
