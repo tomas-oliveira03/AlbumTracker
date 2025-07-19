@@ -1,13 +1,15 @@
 import React from 'react';
-import type { Artist } from '../types/spotify';
+import type { Artist, Album } from '../types/spotify';
 import { connectSpotify } from '../services/spotifyApi';
 
 interface ArtistDetailProps {
   artist: Artist;
+  albums: Album[];
+  isLoading: boolean;
   onBack: () => void;
 }
 
-const ArtistDetail: React.FC<ArtistDetailProps> = ({ artist, onBack }) => {
+const ArtistDetail: React.FC<ArtistDetailProps> = ({ artist, albums, isLoading, onBack }) => {
   // Function to format follower numbers
   const formatFollowers = (count: number): string => {
     if (count >= 1000000) {
@@ -99,23 +101,18 @@ const ArtistDetail: React.FC<ArtistDetailProps> = ({ artist, onBack }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Left column */}
             <div>
-              {/* Genres */}
+              {/* Popularity section - replaced genres */}
               <div className="mb-8">
-                <h2 className="text-xl font-bold mb-4 border-b border-gray-800 pb-2">Genres</h2>
-                {artist.genres && artist.genres.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
-                    {artist.genres.map(genre => (
-                      <span 
-                        key={genre} 
-                        className="bg-gray-800 text-gray-300 px-3 py-1 rounded-full text-sm"
-                      >
-                        {genre}
-                      </span>
-                    ))}
+                <h2 className="text-xl font-bold mb-4 border-b border-gray-800 pb-2">Popularity</h2>
+                <div className="flex items-center">
+                  <div className="bg-gray-800 rounded-full h-4 w-full overflow-hidden">
+                    <div 
+                      className="bg-spotify-green h-full" 
+                      style={{ width: `${artist.popularity || 0}%` }}
+                    ></div>
                   </div>
-                ) : (
-                  <p className="text-gray-400">No genres available</p>
-                )}
+                  <span className="ml-3 text-lg font-medium">{artist.popularity || 0}/100</span>
+                </div>
               </div>
               
               {/* External links */}
@@ -153,6 +150,47 @@ const ArtistDetail: React.FC<ArtistDetailProps> = ({ artist, onBack }) => {
                 <p className="text-gray-400 text-center">We're working on bringing you the artist's top tracks and more!</p>
               </div>
             </div>
+          </div>
+          
+          {/* Albums section */}
+          <div className="mt-10">
+            <h2 className="text-2xl font-bold mb-6 border-b border-gray-700 pb-2">Albums</h2>
+            
+            {isLoading ? (
+              <div className="flex justify-center py-10">
+                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-spotify-green"></div>
+              </div>
+            ) : albums.length > 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
+                {albums.map(album => (
+                  <div key={album.id} className="bg-black/30 rounded-lg overflow-hidden group hover:bg-black/40 transition-all">
+                    <div className="relative">
+                      <img 
+                        src={album.images[0]?.url || '/default-album.png'} 
+                        alt={album.name} 
+                        className="w-full aspect-square object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
+                        <button className="bg-spotify-green hover:scale-110 p-3 rounded-full shadow-lg transform transition-all">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    <div className="p-3">
+                      <h3 className="font-medium text-white truncate">{album.name}</h3>
+                      <p className="text-gray-400 text-sm">{album.release_date.split('-')[0]} • {album.total_tracks} tracks</p>
+                      <button className="mt-2 w-full py-1.5 text-sm bg-gray-800 hover:bg-spotify-green text-white rounded transition-colors">
+                        Track Album
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-400 text-center py-8">No albums found for this artist.</p>
+            )}
           </div>
         </div>
       </div>

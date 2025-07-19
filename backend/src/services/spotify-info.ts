@@ -71,3 +71,14 @@ export async function getAlbumsByArtist(artistId: string) {
 		throw new Error('Failed to retrieve artist info');
 	}
 }
+
+
+export async function getArtistFullInformation(artistId: string){
+  const artist = await getArtistById(artistId)
+  const albums = await getAlbumsByArtist(artistId)
+
+  return {
+    artist: artist,
+    albums: albums
+  }
+}

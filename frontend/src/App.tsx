@@ -2,10 +2,15 @@ import { useState, useEffect } from 'react';
 import SearchBar from './components/SearchBar';
 import SearchResults from './components/results/SearchResults';
 import ArtistDetail from './components/ArtistDetail';
-import { connectSpotify } from './services/spotifyApi';
-import type { SearchResults as SearchResultsType, Artist } from './types/spotify';
+import { connectSpotify, getArtistById } from './services/spotifyApi';
+import type { SearchResults as SearchResultsType, Artist, Album } from './types/spotify';
 import { searchSpotify } from './services/spotifyApi';
 import './App.css';
+
+interface ArtistDetailData {
+  artist: Artist;
+  albums: Album[];
+}
 
 function App() {
   const [searchResults, setSearchResults] = useState<SearchResultsType | null>(null);
@@ -15,6 +20,8 @@ function App() {
     query: '',
     type: 'track,album,artist'
   });
+  const [artistData, setArtistData] = useState<ArtistDetailData | null>(null);
+  const [artistLoading, setArtistLoading] = useState(false);
 
   // Parse URL and update state based on current location
   const handleUrlChange = () => {
@@ -25,9 +32,8 @@ function App() {
       const artistId = path.substring('/artist/'.length);
       if (artistId) {
         // If we don't have this artist loaded, we should fetch it
-        if (!selectedArtist || selectedArtist.id !== artistId) {
-          // For now just log - would need API endpoint to fetch by ID
-          console.log('Should load artist with ID:', artistId);
+        if (!artistData || artistData.artist.id !== artistId) {
+          loadArtist(artistId);
         }
       }
     }
@@ -66,6 +72,22 @@ function App() {
     else if (path === '/') {
       setSelectedArtist(null);
       setSearchResults(null);
+    }
+  };
+
+  const loadArtist = async (artistId: string) => {
+    setArtistLoading(true);
+    try {
+      const data = await getArtistById(artistId);
+      setArtistData(data);
+      setSelectedArtist(data.artist);
+    } catch (error) {
+      console.error('Failed to load artist:', error);
+      // Fallback to home page if artist can't be loaded
+      window.history.pushState({}, '', '/');
+      setSelectedArtist(null);
+    } finally {
+      setArtistLoading(false);
     }
   };
 
@@ -113,6 +135,9 @@ function App() {
     // Clean URL - use a simple /artist/id pattern
     const newUrl = `/artist/${artist.id}`;
     window.history.pushState({ path: newUrl }, '', newUrl);
+    
+    // Load artist details
+    loadArtist(artist.id);
     
     // Scroll to top when viewing artist
     window.scrollTo(0, 0);
@@ -163,7 +188,12 @@ function App() {
         {/* Show artist detail if an artist is selected */}
         {selectedArtist ? (
           <div className="w-full px-4 py-8">
-            <ArtistDetail artist={selectedArtist} onBack={handleBackToSearch} />
+            <ArtistDetail 
+              artist={selectedArtist} 
+              albums={artistData?.albums || []} 
+              isLoading={artistLoading}
+              onBack={handleBackToSearch} 
+            />
           </div>
         ) : (
           <>
@@ -231,6 +261,5 @@ function App() {
     </div>
   );
 }
-
 
 export default App;
