@@ -13,16 +13,10 @@ const spotifyApi = new SpotifyWebApi({
 export async function getAccessToken(){
     const data = await spotifyApi.clientCredentialsGrant();
     spotifyApi.setAccessToken(data.body['access_token']);
-
-    // const accessToken = "BQBSHh3YCJP2DcJGkQ8eaDtJnfg48QTRhdId9360QayLgAPpYUfAmw-nprUtHga3IRe0hPSrwJzj6thq3utEe-7GLwNSvMyKQ3Swqvfp7KrESC4NapBVcOOT3b5RDzdoR5zTvRuPRNQ"
-    // spotifyApi.setAccessToken(accessToken);
 }
 
 export async function searchForSong(songName: string) {
     try {
-        // Get access token (Client Credentials Flow)
-        await getAccessToken()
-
         // Fetch artist info
         const response = await spotifyApi.searchTracks(songName, { limit: 5 });
 
@@ -40,9 +34,6 @@ export async function searchForSong(songName: string) {
 
 export async function searchForAlbum(albumName: string) {
   try {
-    // Get access token (Client Credentials Flow)
-    await getAccessToken();
-
     // Search for albums
     const response = await spotifyApi.searchAlbums(albumName, { limit: 5 });
 
@@ -58,27 +49,26 @@ export async function searchForAlbum(albumName: string) {
 }
 
 export async function searchForArtist(artistName: string) {
-  try {
-    // Get access token (Client Credentials Flow)
-    await getAccessToken();
+	try {
+		const response = await spotifyApi.searchArtists(artistName, { limit: 15 });
+		const artistsContent = response.body.artists
+		return artistsContent
 
-    // Search for artists
-    const response = await spotifyApi.searchArtists(artistName, { limit: 5 });
-
-
-    response.body.artists?.items.forEach((artist, index) => {
-      console.log(`🎤 [${index + 1}] ${artist.name}`);
-      console.log(`    👥 Followers: ${artist.followers.total}`);
-      console.log(`    🎶 Genres: ${artist.genres.join(', ') || 'N/A'}`);
-      console.log(`    ▶️ ${artist.external_urls.spotify}`);
-    });
-
-    const artistsContent = response.body.artists
-    return artistsContent
-
-  } catch (err) {
-    console.error('Failed to fetch artist:', err);
-    return err
-  }
+	} catch (err) {
+		console.error('Failed to fetch artist:', err);
+		throw new Error('Artist search failed');
+	}
 }
 
+
+
+export async function getArtistById(artistId: string) {
+	try {
+		const response = await spotifyApi.getArtist(artistId);
+		return response.body;
+		
+	} catch (err) {
+		console.error(`Failed to fetch artist with ID ${artistId}:`, err);
+		throw new Error('Failed to retrieve artist info');
+	}
+}

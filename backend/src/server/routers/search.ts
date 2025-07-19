@@ -1,10 +1,10 @@
 import express, { Request, Response } from 'express';
 import { treeifyError } from 'zod';
-const router = express.Router();
 import { logger } from '@/lib/logger';
 import { searchByArtistSchema } from '../schemas/search';
 import { searchForArtist } from '@/services/spotify-search';
 
+const router = express.Router();
 
 // Seach by artist request
 router.get('/artist', async (req: Request, res: Response) => {

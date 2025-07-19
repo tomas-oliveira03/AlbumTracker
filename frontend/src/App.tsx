@@ -16,20 +16,26 @@ function App() {
     type: 'track,album,artist'
   });
 
-  // Parse URL path on initial load
-  useEffect(() => {
+  // Parse URL and update state based on current location
+  const handleUrlChange = () => {
     const path = window.location.pathname;
     
     // Check if we're viewing an artist page
     if (path.startsWith('/artist/')) {
       const artistId = path.substring('/artist/'.length);
       if (artistId) {
-        // TODO: Fetch artist details by ID when we have that API endpoint
-        console.log('Should load artist with ID:', artistId);
+        // If we don't have this artist loaded, we should fetch it
+        if (!selectedArtist || selectedArtist.id !== artistId) {
+          // For now just log - would need API endpoint to fetch by ID
+          console.log('Should load artist with ID:', artistId);
+        }
       }
     }
     // Check if we're on a search path
     else if (path.startsWith('/search/')) {
+      // Clear selected artist when navigating to search
+      setSelectedArtist(null);
+      
       const searchParamsString = path.substring('/search/'.length);
       const params = new URLSearchParams(searchParamsString);
       
@@ -37,14 +43,43 @@ function App() {
       const name = params.get('name');
       
       if (type && name) {
-        // Save the search parameters to state so they can be passed to the SearchBar
-        setSearchParams({
-          query: name,
-          type: type
-        });
-        handleSearch(name, type);
+        // Only perform search if params changed
+        if (searchParams.query !== name || searchParams.type !== type) {
+          setSearchParams({
+            query: name,
+            type: type
+          });
+          searchSpotify(name, type)
+            .then(results => {
+              setSearchResults(results);
+              setIsLoading(false);
+            })
+            .catch(error => {
+              console.error('Search failed:', error);
+              setIsLoading(false);
+            });
+          setIsLoading(true);
+        }
       }
     }
+    // Home page (root path)
+    else if (path === '/') {
+      setSelectedArtist(null);
+      setSearchResults(null);
+    }
+  };
+
+  // Initial URL parsing on component mount
+  useEffect(() => {
+    handleUrlChange();
+    
+    // Add listener for browser back/forward navigation
+    window.addEventListener('popstate', handleUrlChange);
+    
+    // Clean up event listener on unmount
+    return () => {
+      window.removeEventListener('popstate', handleUrlChange);
+    };
   }, []);
 
   const handleSearch = async (query: string, type: string) => {

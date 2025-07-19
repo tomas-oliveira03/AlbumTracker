@@ -4,6 +4,7 @@ import { initializeDatabase } from "./db";
 import { envs } from "./config";
 import { logger } from "./lib/logger";
 import apiRouter from "./server/routers";
+import { getAccessToken } from "./services/spotify-search";
 
 
 const app = express();
@@ -28,6 +29,7 @@ const startServer = async () => {
 
     server = app.listen(envs.PORT, () => {
       logger.info(`Server is running at http://localhost:${envs.PORT}`);
+      getAccessToken()
     });
 
 
