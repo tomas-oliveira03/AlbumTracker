@@ -1,13 +1,14 @@
 import React from 'react';
-import type { Album } from '../types/spotify';
+import type { Album, Artist } from '../types/spotify';
 
 interface AlbumDetailProps {
   album: Album;
   isLoading: boolean;
   onBack: () => void;
+  onViewArtist: (artist: Artist) => void;
 }
 
-const AlbumDetail: React.FC<AlbumDetailProps> = ({ album, isLoading, onBack }) => {
+const AlbumDetail: React.FC<AlbumDetailProps> = ({ album, isLoading, onBack, onViewArtist }) => {
   // Format duration from ms to mm:ss
   const formatDuration = (ms: number) => {
     const minutes = Math.floor(ms / 60000);
@@ -20,6 +21,16 @@ const AlbumDetail: React.FC<AlbumDetailProps> = ({ album, isLoading, onBack }) =
     if (!date) return '';
     const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
     return new Date(date).toLocaleDateString(undefined, options);
+  };
+
+  // Calculate total duration of the album
+  const totalDuration = album?.tracks?.items?.reduce((total, track) => total + (track.duration_ms || 0), 0) || 0;
+
+  // Format total duration for display
+  const formatTotalDuration = (ms: number) => {
+    const minutes = Math.floor(ms / 60000);
+    const seconds = ((ms % 60000) / 1000).toFixed(0);
+    return `${minutes}m ${Number(seconds) < 10 ? '0' : ''}${seconds}s`;
   };
 
   if (isLoading) {
@@ -73,25 +84,28 @@ const AlbumDetail: React.FC<AlbumDetailProps> = ({ album, isLoading, onBack }) =
             <div>
               <span className="text-gray-400 uppercase text-sm font-medium">{album.album_type || 'Album'}</span>
               <h1 className="text-3xl md:text-4xl font-bold text-white mt-1 mb-2">{album.name}</h1>
-              <div className="flex items-center gap-2 mb-4">
-                <span className="font-medium">{album.artists?.map(a => a.name).join(', ')}</span>
+              <div className="flex flex-wrap items-center gap-2 mb-4">
+                <span className="font-medium">
+                  {album.artists?.map((artist, index) => (
+                    <React.Fragment key={artist.id}>
+                      {index > 0 && ', '}
+                      <button 
+                        onClick={() => onViewArtist(artist)}
+                        className="hover:text-spotify-green hover:underline transition-colors"
+                      >
+                        {artist.name}
+                      </button>
+                    </React.Fragment>
+                  ))}
+                </span>
                 <span className="text-gray-400 text-sm">• {album.release_date && formatReleaseDate(album.release_date)}</span>
                 <span className="text-gray-400 text-sm">• {album.total_tracks} songs</span>
+                {totalDuration > 0 && (
+                  <span className="text-gray-400 text-sm">• {formatTotalDuration(totalDuration)}</span>
+                )}
               </div>
               {album.label && (
                 <p className="text-gray-400 text-sm mt-2">Label: {album.label}</p>
-              )}
-              {album.popularity && (
-                <div className="mt-4 flex items-center">
-                  <span className="text-gray-400 text-sm mr-2">Popularity:</span>
-                  <div className="bg-gray-800 rounded-full h-2 w-32 overflow-hidden">
-                    <div 
-                      className="bg-spotify-green h-full" 
-                      style={{ width: `${album.popularity}%` }}
-                    ></div>
-                  </div>
-                  <span className="ml-2 text-sm text-gray-400">{album.popularity}/100</span>
-                </div>
               )}
             </div>
             
@@ -115,7 +129,15 @@ const AlbumDetail: React.FC<AlbumDetailProps> = ({ album, isLoading, onBack }) =
         
         {/* Tracks list */}
         <div className="px-6 md:px-8 pb-8">
-          <h2 className="text-xl font-bold mb-4 border-b border-gray-800 pb-2">Tracks</h2>
+          {/* Tracks list header with total duration */}
+          <h2 className="text-xl font-bold mb-4 border-b border-gray-800 pb-2 flex justify-between items-center">
+            <span>Tracks</span>
+            {totalDuration > 0 && (
+              <span className="text-base font-normal text-gray-400">
+                Total listening time: {formatTotalDuration(totalDuration)}
+              </span>
+            )}
+          </h2>
           
           {tracks.length > 0 ? (
             <div className="bg-black/20 backdrop-blur-sm rounded-xl overflow-hidden">

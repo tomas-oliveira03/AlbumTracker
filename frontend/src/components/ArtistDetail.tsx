@@ -90,14 +90,6 @@ const ArtistDetail: React.FC<ArtistDetailProps> = ({
                     {formatFollowers(artist.followers.total)}
                   </span>
                 )}
-                {artist.popularity && (
-                  <span className="text-gray-300 flex items-center">
-                    <span className="mr-1">Popularity:</span>
-                    <span className="bg-spotify-green text-black font-bold rounded-full px-2 py-0.5 text-sm">
-                      {artist.popularity}/100
-                    </span>
-                  </span>
-                )}
               </div>
             </div>
           </div>
@@ -108,18 +100,12 @@ const ArtistDetail: React.FC<ArtistDetailProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Left column */}
             <div>
-              {/* Popularity section - replaced genres */}
+              {/* About section */}
               <div className="mb-8">
-                <h2 className="text-xl font-bold mb-4 border-b border-gray-800 pb-2">Popularity</h2>
-                <div className="flex items-center">
-                  <div className="bg-gray-800 rounded-full h-4 w-full overflow-hidden">
-                    <div 
-                      className="bg-spotify-green h-full" 
-                      style={{ width: `${artist.popularity || 0}%` }}
-                    ></div>
-                  </div>
-                  <span className="ml-3 text-lg font-medium">{artist.popularity || 0}/100</span>
-                </div>
+                <h2 className="text-xl font-bold mb-4 border-b border-gray-800 pb-2">About</h2>
+                <p className="text-gray-300">
+                  {artist.followers ? `${formatFollowers(artist.followers.total)}` : 'No follower information available'}
+                </p>
               </div>
               
               {/* External links */}

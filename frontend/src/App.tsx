@@ -136,6 +136,10 @@ function App() {
   }, []);
 
   const handleSearch = async (query: string, type: string) => {
+    // Clear the detail views when performing a new search
+    setSelectedArtist(null);
+    setSelectedAlbum(null);
+    
     setIsLoading(true);
     
     // Update URL with search parameters in the path
@@ -158,6 +162,21 @@ function App() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Add a click handler for the app logo to return to home
+  const handleHomeClick = () => {
+    // Clear all states to return to home
+    setSelectedArtist(null);
+    setSelectedAlbum(null);
+    setSearchResults(null);
+    setSearchParams({
+      query: '',
+      type: 'track,album,artist'
+    });
+    
+    // Update URL to home
+    window.history.pushState({}, '', '/');
   };
 
   const handleViewArtist = (artist: Artist) => {
@@ -214,7 +233,12 @@ function App() {
       {/* Header with blurred background effect - full width */}
       <header className="sticky top-0 z-10 backdrop-blur-md bg-black/70 border-b border-gray-800 w-full">
         <div className="w-full flex flex-col md:flex-row items-center justify-between gap-4 px-4 py-3">
-          <h1 className="text-3xl font-bold text-spotify-green">Album Tracker</h1>
+          <h1 
+            className="text-3xl font-bold text-spotify-green cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={handleHomeClick}
+          >
+            Album Tracker
+          </h1>
           <div className="w-full max-w-3xl">
             <SearchBar 
               onSearch={handleSearch} 
@@ -240,6 +264,7 @@ function App() {
               album={selectedAlbum} 
               isLoading={detailsLoading}
               onBack={handleBackToSearch} 
+              onViewArtist={handleViewArtist}
             />
           </div>
         ) : selectedArtist ? (
