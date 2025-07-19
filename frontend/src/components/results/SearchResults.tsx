@@ -80,6 +80,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
           </span>
         </div>
 
+        {/* Track results */}
         {itemType === 'track' && (
           <div className="bg-black/20 backdrop-blur-sm rounded-xl overflow-hidden">
             {items
@@ -90,6 +91,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
           </div>
         )}
 
+        {/* Album results */}
         {itemType === 'album' && (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
             {items
@@ -100,11 +102,14 @@ const SearchResults: React.FC<SearchResultsProps> = ({
           </div>
         )}
 
+        {/* Artist results */}
         {itemType === 'artist' && (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
-            {items.map(artist => (
-              <ArtistItem key={artist.id} artist={artist} onViewArtist={onViewArtist} />
-            ))}
+            {items
+              .filter((item): item is Artist => item.type === 'artist')
+              .map(artist => (
+                <ArtistItem key={artist.id} artist={artist} onViewArtist={onViewArtist} />
+              ))}
           </div>
         )}
 

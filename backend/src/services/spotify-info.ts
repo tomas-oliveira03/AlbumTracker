@@ -19,17 +19,13 @@ export async function searchForSong(songName: string) {
 
 export async function searchForAlbum(albumName: string) {
   try {
-    // Search for albums
-    const response = await spotifyApi.searchAlbums(albumName, { limit: 5 });
-
-    response.body.albums?.items.forEach((album, index) => {
-      console.log(`💿 [${index + 1}] ${album.name} by ${album.artists.map(a => a.name).join(', ')}`);
-      console.log(`    📅 Release: ${album.release_date}`);
-      console.log(`    ▶️ ${album.external_urls.spotify}`);
-    });
+    const response = await spotifyApi.searchAlbums(albumName, { limit: 15 });
+    const albumsContent = response.body.albums;
+    return albumsContent;
 
   } catch (err) {
     console.error('Failed to fetch album:', err);
+    throw new Error('Album search failed');
   }
 }
 
