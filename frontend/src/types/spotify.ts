@@ -29,6 +29,20 @@ export interface Album {
   release_date: string;
   total_tracks: number;
   type?: string;
+  album_type?: string;
+  popularity?: number;
+  label?: string;
+  external_urls?: {
+    spotify: string;
+  };
+  copyrights?: {
+    text: string;
+    type: string;
+  }[];
+  tracks?: {
+    items: Track[];
+    total: number;
+  };
 }
 
 export interface Track {

@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import SearchBar from './components/SearchBar';
 import SearchResults from './components/results/SearchResults';
 import ArtistDetail from './components/ArtistDetail';
-import { connectSpotify, getArtistById } from './services/spotifyApi';
+import AlbumDetail from './components/AlbumDetail';
+import { connectSpotify, getArtistById, getAlbumById } from './services/spotifyApi';
 import type { SearchResults as SearchResultsType, Artist, Album } from './types/spotify';
 import { searchSpotify } from './services/spotifyApi';
 import './App.css';
@@ -16,6 +17,8 @@ function App() {
   const [searchResults, setSearchResults] = useState<SearchResultsType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
+  const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
+  const [detailsLoading, setDetailsLoading] = useState(false);
   const [searchParams, setSearchParams] = useState<{query: string, type: string}>({
     query: '',
     type: 'track,album,artist'
@@ -27,8 +30,18 @@ function App() {
   const handleUrlChange = () => {
     const path = window.location.pathname;
     
+    // Check if we're viewing an album page
+    if (path.startsWith('/album/')) {
+      const albumId = path.substring('/album/'.length);
+      if (albumId) {
+        // If we don't have this album loaded, we should fetch it
+        if (!selectedAlbum || selectedAlbum.id !== albumId) {
+          loadAlbum(albumId);
+        }
+      }
+    }
     // Check if we're viewing an artist page
-    if (path.startsWith('/artist/')) {
+    else if (path.startsWith('/artist/')) {
       const artistId = path.substring('/artist/'.length);
       if (artistId) {
         // If we don't have this artist loaded, we should fetch it
@@ -39,8 +52,9 @@ function App() {
     }
     // Check if we're on a search path
     else if (path.startsWith('/search/')) {
-      // Clear selected artist when navigating to search
+      // Clear selected artist and album when navigating to search
       setSelectedArtist(null);
+      setSelectedAlbum(null);
       
       const searchParamsString = path.substring('/search/'.length);
       const params = new URLSearchParams(searchParamsString);
@@ -71,6 +85,7 @@ function App() {
     // Home page (root path)
     else if (path === '/') {
       setSelectedArtist(null);
+      setSelectedAlbum(null);
       setSearchResults(null);
     }
   };
@@ -88,6 +103,22 @@ function App() {
       setSelectedArtist(null);
     } finally {
       setArtistLoading(false);
+    }
+  };
+
+  const loadAlbum = async (albumId: string) => {
+    setDetailsLoading(true);
+    try {
+      const data = await getAlbumById(albumId);
+      setSelectedAlbum(data);
+      setSelectedArtist(null);
+    } catch (error) {
+      console.error('Failed to load album:', error);
+      // Fallback to home page if album can't be loaded
+      window.history.pushState({}, '', '/');
+      setSelectedAlbum(null);
+    } finally {
+      setDetailsLoading(false);
     }
   };
 
@@ -131,6 +162,7 @@ function App() {
 
   const handleViewArtist = (artist: Artist) => {
     setSelectedArtist(artist);
+    setSelectedAlbum(null);
     
     // Clean URL - use a simple /artist/id pattern
     const newUrl = `/artist/${artist.id}`;
@@ -143,8 +175,24 @@ function App() {
     window.scrollTo(0, 0);
   };
 
+  const handleViewAlbum = (album: Album) => {
+    setSelectedAlbum(album);
+    setSelectedArtist(null);
+    
+    // Clean URL - use a simple /album/id pattern
+    const newUrl = `/album/${album.id}`;
+    window.history.pushState({ path: newUrl }, '', newUrl);
+    
+    // Load album details
+    loadAlbum(album.id);
+    
+    // Scroll to top when viewing album
+    window.scrollTo(0, 0);
+  };
+
   const handleBackToSearch = () => {
     setSelectedArtist(null);
+    setSelectedAlbum(null);
     
     // Check if we have active search params to return to
     if (searchParams.query) {
@@ -185,14 +233,23 @@ function App() {
       
       {/* Main content - full width */}
       <main className="flex-grow w-full">
-        {/* Show artist detail if an artist is selected */}
-        {selectedArtist ? (
+        {/* Show album detail if an album is selected */}
+        {selectedAlbum ? (
+          <div className="w-full px-4 py-8">
+            <AlbumDetail 
+              album={selectedAlbum} 
+              isLoading={detailsLoading}
+              onBack={handleBackToSearch} 
+            />
+          </div>
+        ) : selectedArtist ? (
           <div className="w-full px-4 py-8">
             <ArtistDetail 
               artist={selectedArtist} 
               albums={artistData?.albums || []} 
-              isLoading={artistLoading}
+              isLoading={detailsLoading}
               onBack={handleBackToSearch} 
+              onViewAlbum={handleViewAlbum}
             />
           </div>
         ) : (
@@ -237,6 +294,7 @@ function App() {
                   results={searchResults} 
                   isLoading={isLoading} 
                   onViewArtist={handleViewArtist}
+                  onViewAlbum={handleViewAlbum}
                 />
               </div>
             )}

@@ -20,9 +20,15 @@ interface SearchResultsProps {
   results: ApiSearchResults | null;
   isLoading: boolean;
   onViewArtist: (artist: Artist) => void;
+  onViewAlbum: (album: Album) => void;
 }
 
-const SearchResults: React.FC<SearchResultsProps> = ({ results, isLoading, onViewArtist }) => {
+const SearchResults: React.FC<SearchResultsProps> = ({ 
+  results, 
+  isLoading, 
+  onViewArtist,
+  onViewAlbum
+}) => {
   // Loading state
   if (isLoading) {
     return (
@@ -89,7 +95,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ results, isLoading, onVie
             {items
               .filter((item): item is Album => item.type === 'album')
               .map(album => (
-                <AlbumItem key={album.id} album={album} />
+                <AlbumItem key={album.id} album={album} onViewAlbum={onViewAlbum} />
               ))}
           </div>
         )}

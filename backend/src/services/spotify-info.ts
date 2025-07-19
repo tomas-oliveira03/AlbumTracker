@@ -72,7 +72,6 @@ export async function getAlbumsByArtist(artistId: string) {
 	}
 }
 
-
 export async function getArtistFullInformation(artistId: string){
   const artist = await getArtistById(artistId)
   const albums = await getAlbumsByArtist(artistId)
@@ -81,4 +80,17 @@ export async function getArtistFullInformation(artistId: string){
     artist: artist,
     albums: albums
   }
+}
+
+
+
+export async function getAlbumInfo(albumId: string){
+  try {
+		const response = await spotifyApi.getAlbum(albumId);
+		return response.body;
+		
+	} catch (err) {
+		console.error(`Failed to fetch album with ID ${albumId}:`, err);
+		throw new Error('Failed to retrieve artist info');
+	}
 }

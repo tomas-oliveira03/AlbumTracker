@@ -7,9 +7,16 @@ interface ArtistDetailProps {
   albums: Album[];
   isLoading: boolean;
   onBack: () => void;
+  onViewAlbum: (album: Album) => void;
 }
 
-const ArtistDetail: React.FC<ArtistDetailProps> = ({ artist, albums, isLoading, onBack }) => {
+const ArtistDetail: React.FC<ArtistDetailProps> = ({ 
+  artist, 
+  albums, 
+  isLoading, 
+  onBack,
+  onViewAlbum 
+}) => {
   // Function to format follower numbers
   const formatFollowers = (count: number): string => {
     if (count >= 1000000) {
@@ -163,7 +170,11 @@ const ArtistDetail: React.FC<ArtistDetailProps> = ({ artist, albums, isLoading, 
             ) : albums.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
                 {albums.map(album => (
-                  <div key={album.id} className="bg-black/30 rounded-lg overflow-hidden group hover:bg-black/40 transition-all">
+                  <div 
+                    key={album.id} 
+                    className="bg-black/30 rounded-lg overflow-hidden group hover:bg-black/40 transition-all cursor-pointer"
+                    onClick={() => onViewAlbum(album)}
+                  >
                     <div className="relative">
                       <img 
                         src={album.images[0]?.url || '/default-album.png'} 

@@ -1,13 +1,13 @@
 import express, { Request, Response } from 'express';
 import { logger } from '@/lib/logger';
-import { getArtistFullInformation } from '@/services/spotify-info';
-import { artistSchema } from '../schemas/artist';
+import { albumSchema } from '../schemas/album';
+import { getAlbumInfo } from '@/services/spotify-info';
 
 const router = express.Router();
 
 router.get('/:id', async (req: Request, res: Response) => {
     try{
-        const parsedParams = artistSchema.safeParse(req.params);
+        const parsedParams = albumSchema.safeParse(req.params);
 
         if (!parsedParams.success) {
             return res.status(400).json({
@@ -17,9 +17,9 @@ router.get('/:id', async (req: Request, res: Response) => {
         }
 
         const { id } = parsedParams.data;
-        const artist = await getArtistFullInformation(id); 
+        const album = await getAlbumInfo(id); 
 
-        return res.status(200).json(artist);
+        return res.status(200).json(album);
 
     }
     catch (error) {
