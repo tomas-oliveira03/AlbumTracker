@@ -1,19 +1,13 @@
 import spotifyApi from './spotify-client';
 
-export async function searchForSong(songName: string) {
+export async function searchForTrack(songName: string) {
     try {
-        // Fetch artist info
-        const response = await spotifyApi.searchTracks(songName, { limit: 5 });
-
-
-        response.body.tracks?.items.forEach((track, index) => {
-            console.log(`🎵 [${index + 1}] ${track.name} by ${track.artists.map(a => a.name).join(', ')}`);
-            console.log(`    ▶️ ${track.external_urls.spotify}`);
-            });
-
+        const response = await spotifyApi.searchTracks(songName, { limit: 15 });
+        const tracksContent = response.body.tracks;
+        return tracksContent;
 
     } catch (err) {
-        console.error('Failed to fetch artist:', err);
+        throw new Error('Song search failed');
     }
 }
 
@@ -24,7 +18,6 @@ export async function searchForAlbum(albumName: string) {
     return albumsContent;
 
   } catch (err) {
-    console.error('Failed to fetch album:', err);
     throw new Error('Album search failed');
   }
 }
@@ -36,7 +29,6 @@ export async function searchForArtist(artistName: string) {
 		return artistsContent
 
 	} catch (err) {
-		console.error('Failed to fetch artist:', err);
 		throw new Error('Artist search failed');
 	}
 }
@@ -49,7 +41,6 @@ export async function getArtistById(artistId: string) {
 		return response.body;
 		
 	} catch (err) {
-		console.error(`Failed to fetch artist with ID ${artistId}:`, err);
 		throw new Error('Failed to retrieve artist info');
 	}
 }
@@ -63,7 +54,6 @@ export async function getAlbumsByArtist(artistId: string) {
 		return response.body.items;
 		
 	} catch (err) {
-		console.error(`Failed to fetch artist with ID ${artistId}:`, err);
 		throw new Error('Failed to retrieve artist info');
 	}
 }
@@ -79,14 +69,12 @@ export async function getArtistFullInformation(artistId: string){
 }
 
 
-
 export async function getAlbumInfo(albumId: string){
   try {
 		const response = await spotifyApi.getAlbum(albumId);
 		return response.body;
 		
 	} catch (err) {
-		console.error(`Failed to fetch album with ID ${albumId}:`, err);
 		throw new Error('Failed to retrieve artist info');
 	}
 }

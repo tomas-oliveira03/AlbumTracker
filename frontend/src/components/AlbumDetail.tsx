@@ -99,7 +99,9 @@ const AlbumDetail: React.FC<AlbumDetailProps> = ({ album, isLoading, onBack, onV
                   ))}
                 </span>
                 <span className="text-gray-400 text-sm">• {album.release_date && formatReleaseDate(album.release_date)}</span>
-                <span className="text-gray-400 text-sm">• {album.total_tracks} songs</span>
+                <span className="text-gray-400 text-sm">
+                  • {album.total_tracks} {album.total_tracks === 1 ? 'song' : 'songs'}
+                </span>
                 {totalDuration > 0 && (
                   <span className="text-gray-400 text-sm">• {formatTotalDuration(totalDuration)}</span>
                 )}

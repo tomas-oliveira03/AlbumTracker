@@ -1,16 +1,30 @@
 import React from 'react';
-import type { Track } from '../../types/spotify';
+import type { Track, Artist, Album } from '../../types/spotify';
 
 interface TrackItemProps {
   track: Track;
+  onViewArtist?: (artist: Artist) => void;
+  onViewAlbum?: (album: Album) => void;
 }
 
-const TrackItem: React.FC<TrackItemProps> = ({ track }) => {
+const TrackItem: React.FC<TrackItemProps> = ({ track, onViewArtist, onViewAlbum }) => {
   // Format duration from ms to mm:ss
   const formatDuration = (ms: number) => {
     const minutes = Math.floor(ms / 60000);
     const seconds = ((ms % 60000) / 1000).toFixed(0);
     return `${minutes}:${Number(seconds) < 10 ? '0' : ''}${seconds}`;
+  };
+  
+  // Handle artist name click
+  const handleArtistClick = (e: React.MouseEvent, artist: Artist) => {
+    e.stopPropagation();
+    if (onViewArtist) onViewArtist(artist);
+  };
+  
+  // Handle album click
+  const handleAlbumClick = (e: React.MouseEvent, album: Album) => {
+    e.stopPropagation();
+    if (onViewAlbum) onViewAlbum(album);
   };
 
   return (
@@ -18,12 +32,31 @@ const TrackItem: React.FC<TrackItemProps> = ({ track }) => {
       <img 
         src={track.album.images[0]?.url || '/default-album.png'} 
         alt={track.album.name} 
-        className="w-14 h-14 object-cover rounded-md mr-4 shadow-lg"
+        className="w-14 h-14 object-cover rounded-md mr-4 shadow-lg cursor-pointer"
+        onClick={(e) => handleAlbumClick(e, track.album)}
       />
       <div className="flex-grow">
         <h3 className="font-medium text-white text-lg">{track.name}</h3>
         <p className="text-gray-400">
-          {track.artists.map(artist => artist.name).join(', ')}
+          {track.artists.map((artist, index) => (
+            <React.Fragment key={artist.id}>
+              {index > 0 && ', '}
+              <span 
+                onClick={(e) => handleArtistClick(e, artist)}
+                className="hover:text-spotify-green hover:underline cursor-pointer transition-colors"
+              >
+                {artist.name}
+              </span>
+            </React.Fragment>
+          ))}
+        </p>
+        <p className="text-gray-500 text-sm">
+          <span 
+            onClick={(e) => handleAlbumClick(e, track.album)}
+            className="hover:text-spotify-green hover:underline cursor-pointer transition-colors"
+          >
+            {track.album.name}
+          </span>
         </p>
       </div>
       <div className="flex items-center gap-4">

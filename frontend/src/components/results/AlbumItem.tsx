@@ -1,12 +1,19 @@
 import React from 'react';
-import type { Album } from '../../types/spotify';
+import type { Album, Artist } from '../../types/spotify';
 
 interface AlbumItemProps {
   album: Album;
   onViewAlbum: (album: Album) => void;
+  onViewArtist: (artist: Artist) => void;
 }
 
-const AlbumItem: React.FC<AlbumItemProps> = ({ album, onViewAlbum }) => {
+const AlbumItem: React.FC<AlbumItemProps> = ({ album, onViewAlbum, onViewArtist }) => {
+  // Handle artist name click - prevent propagation to avoid triggering album click
+  const handleArtistClick = (e: React.MouseEvent, artist: Artist) => {
+    e.stopPropagation();
+    onViewArtist(artist);
+  };
+
   return (
     <div 
       className="bg-black/30 backdrop-blur-sm rounded-xl overflow-hidden hover:bg-black/50 transition-all transform hover:translate-y-[-4px] hover:shadow-xl group cursor-pointer"
@@ -29,11 +36,21 @@ const AlbumItem: React.FC<AlbumItemProps> = ({ album, onViewAlbum }) => {
       <div className="p-4">
         <h3 className="font-medium text-white text-lg truncate">{album.name}</h3>
         <p className="text-gray-400 text-sm truncate mb-3">
-          {album.artists.map(artist => artist.name).join(', ')}
+          {album.artists.map((artist, index) => (
+            <React.Fragment key={artist.id}>
+              {index > 0 && ', '}
+              <span 
+                onClick={(e) => handleArtistClick(e, artist)}
+                className="hover:text-spotify-green hover:underline cursor-pointer transition-colors"
+              >
+                {artist.name}
+              </span>
+            </React.Fragment>
+          ))}
         </p>
         <div className="flex justify-between items-center text-sm text-gray-500">
           <span>{album.release_date.split('-')[0]}</span>
-          <span>{album.total_tracks} tracks</span>
+          <span>{album.total_tracks} {album.total_tracks === 1 ? 'song' : 'songs'}</span>
         </div>
       </div>
     </div>

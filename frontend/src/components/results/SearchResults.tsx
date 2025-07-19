@@ -42,7 +42,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   if (!results) {
     return (
       <div className="text-center py-20 text-gray-400">
-        Search for songs, albums, or artists to see results
+        Search for tracks, albums, or artists to see results
       </div>
     );
   }
@@ -63,7 +63,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   }
 
   // Determine the type of items by checking the first item
-  // Using optional chaining and fallback to handle various response structures
   const itemType = items[0]?.type || 'unknown';
 
   return (
@@ -71,7 +70,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
       <div>
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">
-            {itemType === 'track' ? 'Songs' : 
+            {itemType === 'track' ? 'Tracks' : 
              itemType === 'album' ? 'Albums' : 
              itemType === 'artist' ? 'Artists' : 'Results'}
           </h2>
@@ -80,13 +79,18 @@ const SearchResults: React.FC<SearchResultsProps> = ({
           </span>
         </div>
 
-        {/* Track results */}
+        {/* Track results - enhanced display */}
         {itemType === 'track' && (
           <div className="bg-black/20 backdrop-blur-sm rounded-xl overflow-hidden">
             {items
               .filter((item): item is Track => item.type === 'track')
               .map(track => (
-                <TrackItem key={track.id} track={track} />
+                <TrackItem 
+                  key={track.id} 
+                  track={track} 
+                  onViewArtist={onViewArtist}
+                  onViewAlbum={onViewAlbum}
+                />
               ))}
           </div>
         )}
@@ -97,7 +101,12 @@ const SearchResults: React.FC<SearchResultsProps> = ({
             {items
               .filter((item): item is Album => item.type === 'album')
               .map(album => (
-                <AlbumItem key={album.id} album={album} onViewAlbum={onViewAlbum} />
+                <AlbumItem 
+                  key={album.id} 
+                  album={album} 
+                  onViewAlbum={onViewAlbum} 
+                  onViewArtist={onViewArtist}
+                />
               ))}
           </div>
         )}
@@ -113,6 +122,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
           </div>
         )}
 
+        {/* Unknown type */}
         {itemType === 'unknown' && (
           <div className="text-center py-10">
             <p className="text-gray-400">Received data in an unknown format.</p>

@@ -1,8 +1,8 @@
 import express, { Request, Response } from 'express';
 import { treeifyError } from 'zod';
 import { logger } from '@/lib/logger';
-import { searchByAlbumSchema, searchByArtistSchema } from '../schemas/search';
-import { searchForAlbum, searchForArtist } from '@/services/spotify-info';
+import { searchByAlbumSchema, searchByArtistSchema, searchByTrackSchema } from '../schemas/search';
+import { searchForAlbum, searchForArtist, searchForTrack } from '@/services/spotify-info';
 
 const router = express.Router();
 
@@ -61,6 +61,33 @@ router.get('/album', async (req: Request, res: Response) => {
     }
 });
 
+
+router.get('/track', async (req: Request, res: Response) => {
+    try{
+        const parseResult = searchByTrackSchema.safeParse(req.query);
+
+        if (!parseResult.success) {
+            const formattedErrors = treeifyError(parseResult.error);
+            return res.status(400).json({
+                message: 'Invalid query parameters',
+                errors: formattedErrors,
+            });
+        }
+
+        const { name } = parseResult.data;
+        const tracksInfo = await searchForTrack(name)
+
+        return res.status(200).json(tracksInfo);
+
+    }
+    catch (error) {
+        logger.error(error)
+        return res.status(500).json({
+            message: 'Internal server error',
+            error: error.message
+        });
+    }
+});
 
 export default router;
 

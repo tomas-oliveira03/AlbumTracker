@@ -7,3 +7,7 @@ export const searchByArtistSchema = z.object({
 export const searchByAlbumSchema = z.object({
     name: z.string()
 })
+
+export const searchByTrackSchema = z.object({
+    name: z.string()
+})

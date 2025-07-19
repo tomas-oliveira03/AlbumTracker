@@ -34,7 +34,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search songs, albums or artists..."
+          placeholder="Search tracks, albums or artists..."
           className="flex-grow py-3 px-5 bg-transparent text-white focus:outline-none"
         />
         
@@ -44,7 +44,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           className="px-4 bg-black/30 text-white border-l border-gray-700 focus:outline-none appearance-none cursor-pointer"
         >
           <option value="track,album,artist">All</option>
-          <option value="track">Songs</option>
+          <option value="track">Tracks</option>
           <option value="album">Albums</option>
           <option value="artist">Artists</option>
         </select>
