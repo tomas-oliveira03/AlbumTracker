@@ -1,24 +1,56 @@
 import type { SearchResults } from '../types/spotify';
 
-const API_BASE_URL = 'http://localhost:3000/api'; // Adjust to your backend URL
+// Use relative URL path when using Vite proxy
+const API_BASE_URL = '/api';
 
 export const searchSpotify = async (query: string, type: string): Promise<SearchResults> => {
   try {
-    // This would connect to your backend API which in turn calls Spotify
-    const response = await fetch(`${API_BASE_URL}/search?q=${encodeURIComponent(query)}&type=${type}`);
+    let url;
     
-    if (!response.ok) {
-      throw new Error('Search failed');
+    // Handle different search types with appropriate endpoints
+    if (type === 'artist') {
+      url = `${API_BASE_URL}/search/artist?name=${encodeURIComponent(query)}`;
+    } else if (type === 'album') {
+      url = `${API_BASE_URL}/search/album?name=${encodeURIComponent(query)}`;
+    } else if (type === 'track') {
+      url = `${API_BASE_URL}/search/track?name=${encodeURIComponent(query)}`;
+    } else {
+      // Default for multiple types or other searches
+      url = `${API_BASE_URL}/search?q=${encodeURIComponent(query)}&type=${type}`;
     }
     
-    return await response.json();
+    console.log(`Fetching from: ${url}`);
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`Search failed with status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log('Search response:', data);
+    return data;
   } catch (error) {
     console.error('Error searching Spotify:', error);
     throw error;
   }
 };
 
+export const getArtistById = async (id: string) => {
+  try {
+    const url = `${API_BASE_URL}/artist/${id}`;
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch artist details');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching artist:', error);
+    throw error;
+  }
+};
+
 export const connectSpotify = () => {
-  // This would redirect to your backend's Spotify authorization endpoint
   window.location.href = `${API_BASE_URL}/auth/spotify`;
 };

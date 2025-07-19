@@ -9,6 +9,16 @@ export interface Artist {
   name: string;
   images?: SpotifyImage[];
   genres?: string[];
+  followers?: {
+    total: number;
+  };
+  popularity?: number;
+  external_urls?: {
+    spotify: string;
+  };
+  type?: string;
+  href?: string;
+  uri?: string;
 }
 
 export interface Album {
@@ -18,6 +28,7 @@ export interface Album {
   images: SpotifyImage[];
   release_date: string;
   total_tracks: number;
+  type?: string;
 }
 
 export interface Track {
@@ -26,10 +37,15 @@ export interface Track {
   artists: Artist[];
   album: Album;
   duration_ms: number;
+  type?: string;
 }
 
 export interface SearchResults {
-  tracks?: { items: Track[] };
-  albums?: { items: Album[] };
-  artists?: { items: Artist[] };
+  items: (Track | Album | Artist)[];
+  href?: string;
+  limit?: number;
+  next?: string | null;
+  offset?: number;
+  previous?: string | null;
+  total?: number;
 }

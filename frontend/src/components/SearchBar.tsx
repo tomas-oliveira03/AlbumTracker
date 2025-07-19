@@ -1,12 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface SearchBarProps {
   onSearch: (query: string, type: string) => void;
+  initialQuery?: string;
+  initialType?: string;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
-  const [query, setQuery] = useState('');
-  const [searchType, setSearchType] = useState('track,album,artist');
+const SearchBar: React.FC<SearchBarProps> = ({ 
+  onSearch, 
+  initialQuery = '', 
+  initialType = 'track,album,artist' 
+}) => {
+  const [query, setQuery] = useState(initialQuery);
+  const [searchType, setSearchType] = useState(initialType);
+  
+  // Update state when props change (e.g., from URL navigation)
+  useEffect(() => {
+    setQuery(initialQuery);
+    setSearchType(initialType);
+  }, [initialQuery, initialType]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

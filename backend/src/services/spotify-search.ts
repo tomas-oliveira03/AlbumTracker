@@ -14,8 +14,8 @@ export async function getAccessToken(){
     const data = await spotifyApi.clientCredentialsGrant();
     spotifyApi.setAccessToken(data.body['access_token']);
 
-    const accessToken = "BQBSHh3YCJP2DcJGkQ8eaDtJnfg48QTRhdId9360QayLgAPpYUfAmw-nprUtHga3IRe0hPSrwJzj6thq3utEe-7GLwNSvMyKQ3Swqvfp7KrESC4NapBVcOOT3b5RDzdoR5zTvRuPRNQ"
-    spotifyApi.setAccessToken(accessToken);
+    // const accessToken = "BQBSHh3YCJP2DcJGkQ8eaDtJnfg48QTRhdId9360QayLgAPpYUfAmw-nprUtHga3IRe0hPSrwJzj6thq3utEe-7GLwNSvMyKQ3Swqvfp7KrESC4NapBVcOOT3b5RDzdoR5zTvRuPRNQ"
+    // spotifyApi.setAccessToken(accessToken);
 }
 
 export async function searchForSong(songName: string) {
@@ -65,13 +65,16 @@ export async function searchForArtist(artistName: string) {
     // Search for artists
     const response = await spotifyApi.searchArtists(artistName, { limit: 5 });
 
+
     response.body.artists?.items.forEach((artist, index) => {
       console.log(`🎤 [${index + 1}] ${artist.name}`);
       console.log(`    👥 Followers: ${artist.followers.total}`);
       console.log(`    🎶 Genres: ${artist.genres.join(', ') || 'N/A'}`);
       console.log(`    ▶️ ${artist.external_urls.spotify}`);
     });
-    return response
+
+    const artistsContent = response.body.artists
+    return artistsContent
 
   } catch (err) {
     console.error('Failed to fetch artist:', err);

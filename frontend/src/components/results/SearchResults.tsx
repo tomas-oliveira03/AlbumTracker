@@ -1,15 +1,29 @@
 import React from 'react';
-import type { SearchResults as SearchResultsType } from '../../types/spotify';
+import type { Artist, Album, Track } from '../../types/spotify';
+
 import TrackItem from './TrackItem';
 import AlbumItem from './AlbumItem';
 import ArtistItem from './ArtistItem';
 
-interface SearchResultsProps {
-  results: SearchResultsType | null;
-  isLoading: boolean;
+// Define a specific interface for the search results structure
+interface ApiSearchResults {
+  items: (Artist | Album | Track)[];
+  href?: string;
+  limit?: number;
+  next?: string | null;
+  offset?: number;
+  previous?: string | null;
+  total?: number;
 }
 
-const SearchResults: React.FC<SearchResultsProps> = ({ results, isLoading }) => {
+interface SearchResultsProps {
+  results: ApiSearchResults | null;
+  isLoading: boolean;
+  onViewArtist: (artist: Artist) => void;
+}
+
+const SearchResults: React.FC<SearchResultsProps> = ({ results, isLoading, onViewArtist }) => {
+  // Loading state
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-20">
@@ -18,6 +32,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ results, isLoading }) => 
     );
   }
 
+  // No results state
   if (!results) {
     return (
       <div className="text-center py-20 text-gray-400">
@@ -26,11 +41,12 @@ const SearchResults: React.FC<SearchResultsProps> = ({ results, isLoading }) => 
     );
   }
 
-  const hasTracks = results.tracks && results.tracks.items.length > 0;
-  const hasAlbums = results.albums && results.albums.items.length > 0;
-  const hasArtists = results.artists && results.artists.items.length > 0;
+  console.log('Search results:', results);
 
-  if (!hasTracks && !hasAlbums && !hasArtists) {
+  // Check if results has items
+  const items = results?.items || [];
+  
+  if (items.length === 0) {
     return (
       <div className="text-center py-20">
         <div className="text-4xl mb-4">😕</div>
@@ -40,49 +56,61 @@ const SearchResults: React.FC<SearchResultsProps> = ({ results, isLoading }) => 
     );
   }
 
+  // Determine the type of items by checking the first item
+  // Using optional chaining and fallback to handle various response structures
+  const itemType = items[0]?.type || 'unknown';
+
   return (
     <div className="w-full space-y-12 max-w-7xl mx-auto">
-      {hasTracks && (
-        <div>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold">Songs</h2>
-            <button className="text-spotify-green hover:underline">View all</button>
-          </div>
+      <div>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">
+            {itemType === 'track' ? 'Songs' : 
+             itemType === 'album' ? 'Albums' : 
+             itemType === 'artist' ? 'Artists' : 'Results'}
+          </h2>
+          <span className="text-gray-400">
+            Found {results.total || items.length} results
+          </span>
+        </div>
+
+        {itemType === 'track' && (
           <div className="bg-black/20 backdrop-blur-sm rounded-xl overflow-hidden">
-            {results.tracks!.items.slice(0, 5).map(track => (
-              <TrackItem key={track.id} track={track} />
-            ))}
+            {items
+              .filter((item): item is Track => item.type === 'track')
+              .map(track => (
+                <TrackItem key={track.id} track={track} />
+              ))}
           </div>
-        </div>
-      )}
+        )}
 
-      {hasAlbums && (
-        <div>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold">Albums</h2>
-            <button className="text-spotify-green hover:underline">View all</button>
-          </div>
+        {itemType === 'album' && (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
-            {results.albums!.items.slice(0, 5).map(album => (
-              <AlbumItem key={album.id} album={album} />
-            ))}
+            {items
+              .filter((item): item is Album => item.type === 'album')
+              .map(album => (
+                <AlbumItem key={album.id} album={album} />
+              ))}
           </div>
-        </div>
-      )}
+        )}
 
-      {hasArtists && (
-        <div>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold">Artists</h2>
-            <button className="text-spotify-green hover:underline">View all</button>
-          </div>
+        {itemType === 'artist' && (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
-            {results.artists!.items.slice(0, 5).map(artist => (
-              <ArtistItem key={artist.id} artist={artist} />
+            {items.map(artist => (
+              <ArtistItem key={artist.id} artist={artist} onViewArtist={onViewArtist} />
             ))}
           </div>
-        </div>
-      )}
+        )}
+
+        {itemType === 'unknown' && (
+          <div className="text-center py-10">
+            <p className="text-gray-400">Received data in an unknown format.</p>
+            <pre className="mt-4 bg-gray-800 p-4 rounded-lg text-left text-sm overflow-auto max-h-96">
+              {JSON.stringify(results, null, 2)}
+            </pre>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
