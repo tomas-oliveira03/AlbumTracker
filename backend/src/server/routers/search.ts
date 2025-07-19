@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import { treeifyError } from 'zod';
 import { logger } from '@/lib/logger';
 import { searchByArtistSchema } from '../schemas/search';
-import { searchForArtist } from '@/services/spotify-search';
+import { searchForArtist } from '@/services/spotify-info';
 
 const router = express.Router();
 

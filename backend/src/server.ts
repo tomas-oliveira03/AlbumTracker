@@ -1,11 +1,9 @@
 import express from "express";
 import { initializeDatabase } from "./db";
-// import tradeRouter from "./server/routers/trade";
 import { envs } from "./config";
 import { logger } from "./lib/logger";
 import apiRouter from "./server/routers";
-import { getAccessToken } from "./services/spotify-search";
-
+import { getAccessToken } from "./services/spotify-client";
 
 const app = express();
 

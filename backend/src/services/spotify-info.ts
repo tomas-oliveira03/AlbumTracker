@@ -1,19 +1,4 @@
-import { envs } from '@/config';
-import SpotifyWebApi from 'spotify-web-api-node';
-
-const clientId = envs.SPOTIFY_CLIENT_ID
-const clientSecret = envs.SPOTIFY_CLIENT_SECRET
-
-const spotifyApi = new SpotifyWebApi({
-  clientId: clientId,
-  clientSecret: clientSecret,
-  redirectUri: 'http://127.0.0.1:3000/callback',
-});
-
-export async function getAccessToken(){
-    const data = await spotifyApi.clientCredentialsGrant();
-    spotifyApi.setAccessToken(data.body['access_token']);
-}
+import spotifyApi from './spotify-client';
 
 export async function searchForSong(songName: string) {
     try {
@@ -66,6 +51,20 @@ export async function getArtistById(artistId: string) {
 	try {
 		const response = await spotifyApi.getArtist(artistId);
 		return response.body;
+		
+	} catch (err) {
+		console.error(`Failed to fetch artist with ID ${artistId}:`, err);
+		throw new Error('Failed to retrieve artist info');
+	}
+}
+
+export async function getAlbumsByArtist(artistId: string) {
+	try {
+		const response = await spotifyApi.getArtistAlbums(artistId, { 
+      limit: 15,
+      include_groups: 'album'
+    });
+		return response.body.items;
 		
 	} catch (err) {
 		console.error(`Failed to fetch artist with ID ${artistId}:`, err);
