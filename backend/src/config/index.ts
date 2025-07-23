@@ -18,6 +18,10 @@ class Envs {
 		'DATABASE_URL',
 		'postgres://album-tracker-service:album-tracker-service@localhost:5201/album-tracker-service'
 	);
+	  public readonly REDIS_URL: string = this.getString(
+		'REDIS_URL',
+		'redis://localhost:6420'
+  	);
 	public readonly ENCRYPTION_SECRET_IV: string = this.getString('ENCRYPTION_SECRET_IV', 'your_secret');
 	public readonly ENCRYPTION_SECRET_KEY: string = this.getString('ENCRYPTION_SECRET_KEY', 'your_secret');
 	public readonly FRONTEND_URL: string = this.getString('FRONTEND_URL', 'http://localhost:5173');
@@ -27,6 +31,8 @@ class Envs {
 
 	public readonly SPOTIFY_CLIENT_ID: string = this.getString('SPOTIFY_CLIENT_ID', '');
 	public readonly SPOTIFY_CLIENT_SECRET: string = this.getString('SPOTIFY_CLIENT_SECRET', '');
+	public readonly SPOTIFY_REDIRECT_URI: string = this.getString('SPOTIFY_REDIRECT_URI', '');
+	
 
 	private constructor() {
 		if (this.NODE_ENV === EnvName.LOCAL) {

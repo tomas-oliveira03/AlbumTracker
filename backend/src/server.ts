@@ -1,9 +1,8 @@
 import express from "express";
-import { initializeDatabase } from "./db";
 import { envs } from "./config";
 import { logger } from "./lib/logger";
 import apiRouter from "./server/routers";
-import { getAccessToken } from "./services/spotify-client";
+import { appInitialization } from "./helpers/initialize";
 
 const app = express();
 
@@ -12,7 +11,8 @@ let server: ReturnType<typeof app.listen>;
 const startServer = async () => {
   try {
     logger.info("Initializing resources...");
-    await initializeDatabase();
+    await appInitialization();
+
     // create logger middleware
     app.use((req, _, next) => {
       logger.info(`${req.method} ${req.url}`);
@@ -27,7 +27,7 @@ const startServer = async () => {
 
     server = app.listen(envs.PORT, () => {
       logger.info(`Server is running at http://localhost:${envs.PORT}`);
-      getAccessToken()
+    
     });
 
 
