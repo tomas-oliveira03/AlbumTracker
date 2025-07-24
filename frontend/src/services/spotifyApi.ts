@@ -35,7 +35,7 @@ export const searchSpotify = async (query: string, type: string): Promise<Search
   }
 };
 
-export const getArtistById = async (id: string) => {
+export const getArtistInfo = async (id: string) => {
   try {
     const url = `${API_BASE_URL}/artist/${id}`;
     const response = await fetch(url);

@@ -35,7 +35,7 @@ export async function searchForArtist(artistName: string) {
 
 
 
-export async function getArtistById(artistId: string) {
+export async function getArtistInfo(artistId: string) {
 	try {
 		const response = await spotifyApi.getArtist(artistId);
 		return response.body;
@@ -59,7 +59,7 @@ export async function getAlbumsByArtist(artistId: string) {
 }
 
 export async function getArtistFullInformation(artistId: string){
-  const artist = await getArtistById(artistId)
+  const artist = await getArtistInfo(artistId)
   const albums = await getAlbumsByArtist(artistId)
 
   return {
@@ -77,4 +77,13 @@ export async function getAlbumInfo(albumId: string){
 	} catch (err) {
 		throw new Error('Failed to retrieve artist info');
 	}
+}
+
+export async function getTrackInfo(trackId: string) {
+  try {
+    const response = await spotifyApi.getTrack(trackId);
+    return response.body;
+  } catch (err) {
+    throw new Error('Failed to get track info');
+  }
 }

@@ -3,7 +3,7 @@ import SearchBar from './components/SearchBar';
 import SearchResults from './components/results/SearchResults';
 import ArtistDetail from './components/ArtistDetail';
 import AlbumDetail from './components/AlbumDetail';
-import { connectSpotify, getArtistById, getAlbumById } from './services/spotifyApi';
+import { connectSpotify, getArtistInfo, getAlbumById } from './services/spotifyApi';
 import type { SearchResults as SearchResultsType, Artist, Album } from './types/spotify';
 import { searchSpotify } from './services/spotifyApi';
 import './App.css';
@@ -93,7 +93,7 @@ function App() {
   const loadArtist = async (artistId: string) => {
     setArtistLoading(true);
     try {
-      const data = await getArtistById(artistId);
+      const data = await getArtistInfo(artistId);
       setArtistData(data);
       setSelectedArtist(data.artist);
     } catch (error) {
