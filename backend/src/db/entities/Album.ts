@@ -1,0 +1,36 @@
+import { Check, Column, Entity, PrimaryColumn } from "typeorm"
+
+export enum AlbumType {
+    ALBUM = 'album',
+    SINGLE = 'single',
+    COMPILATION = 'compilation'
+}
+
+@Entity()
+@Check(`"type" IN ('album', 'single', 'compilation')`)
+export class Album {
+    
+    @PrimaryColumn({ type: 'varchar' })
+    id!: string;
+
+    @Column({ type: 'varchar' })
+    name!: string;
+
+    @Column({ type: 'int' })
+    totalTracks!: number;
+
+    @Column({ type: 'varchar' })
+    type!: AlbumType;
+
+    @Column({ type: 'date' })
+    releaseDate!: Date;
+
+    @Column({ type: 'varchar' })
+	externalURL!: string;
+
+    @Column({ type: 'varchar' })
+	imageURL!: string;
+
+    @Column({ type: 'jsonb' })
+	detailedData!: Record<string, any>;
+}
