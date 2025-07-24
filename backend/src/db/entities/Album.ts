@@ -1,4 +1,5 @@
-import { Check, Column, Entity, PrimaryColumn } from "typeorm"
+import { Check, Column, Entity, OneToMany, PrimaryColumn } from "typeorm"
+import { Track } from "./Track";
 
 export enum AlbumType {
     ALBUM = 'album',
@@ -33,4 +34,8 @@ export class Album {
 
     @Column({ type: 'jsonb' })
 	detailedData!: Record<string, any>;
+
+    // Relations
+    @OneToMany(() => Track, (track) => track.album)
+    tracks!: Track[];
 }
