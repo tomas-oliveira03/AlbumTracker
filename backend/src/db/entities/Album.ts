@@ -1,5 +1,6 @@
 import { Check, Column, Entity, OneToMany, PrimaryColumn } from "typeorm"
 import { Track } from "./Track";
+import { AlbumArtist } from "./AlbumArtist";
 
 export enum AlbumType {
     ALBUM = 'album',
@@ -38,4 +39,7 @@ export class Album {
     // Relations
     @OneToMany(() => Track, (track) => track.album)
     tracks!: Track[];
+
+    @OneToMany(() => AlbumArtist, (albumArtist) => albumArtist.album)
+    artistLinks!: AlbumArtist[];
 }
