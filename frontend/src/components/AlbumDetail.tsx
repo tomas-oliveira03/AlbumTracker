@@ -1,14 +1,15 @@
 import React from 'react';
-import type { Album, Artist } from '../types/spotify';
+import type { Album, Artist, Track } from '../types/spotify';
 
 interface AlbumDetailProps {
   album: Album;
   isLoading: boolean;
   onBack: () => void;
   onViewArtist: (artist: Artist) => void;
+  onViewTrack?: (track: Track) => void;
 }
 
-const AlbumDetail: React.FC<AlbumDetailProps> = ({ album, isLoading, onBack, onViewArtist }) => {
+const AlbumDetail: React.FC<AlbumDetailProps> = ({ album, isLoading, onBack, onViewArtist, onViewTrack }) => {
   // Format duration from ms to mm:ss
   const formatDuration = (ms: number) => {
     const minutes = Math.floor(ms / 60000);
@@ -31,6 +32,17 @@ const AlbumDetail: React.FC<AlbumDetailProps> = ({ album, isLoading, onBack, onV
     const minutes = Math.floor(ms / 60000);
     const seconds = ((ms % 60000) / 1000).toFixed(0);
     return `${minutes}m ${Number(seconds) < 10 ? '0' : ''}${seconds}s`;
+  };
+
+  // Handle track click
+  const handleTrackClick = (track: Track) => {
+    if (onViewTrack) onViewTrack(track);
+  };
+
+  // Handle artist click - prevent event propagation
+  const handleArtistClick = (e: React.MouseEvent, artist: Artist) => {
+    e.stopPropagation();
+    onViewArtist(artist);
   };
 
   if (isLoading) {
@@ -154,13 +166,41 @@ const AlbumDetail: React.FC<AlbumDetailProps> = ({ album, isLoading, onBack, onV
                 </thead>
                 <tbody>
                   {tracks.map((track, index) => (
-                    <tr key={track.id} className="border-b border-gray-800 last:border-b-0 hover:bg-white/5 group">
+                    <tr 
+                      key={track.id} 
+                      className="border-b border-gray-800 last:border-b-0 hover:bg-white/5 group cursor-pointer"
+                      onClick={() => onViewTrack ? handleTrackClick(track) : null}
+                    >
                       <td className="p-3 text-gray-400">{track.track_number || (index + 1)}</td>
                       <td className="p-3">
-                        <div className="font-medium text-white">{track.name}</div>
-                        <div className="text-gray-400 text-sm md:hidden">{track.artists.map(a => a.name).join(', ')}</div>
+                        <div className="font-medium text-white hover:text-spotify-green transition-colors">{track.name}</div>
+                        <div className="text-gray-400 text-sm md:hidden">
+                          {track.artists.map((artist, idx) => (
+                            <React.Fragment key={artist.id}>
+                              {idx > 0 && ', '}
+                              <span 
+                                onClick={(e) => handleArtistClick(e, artist)}
+                                className="hover:text-spotify-green hover:underline cursor-pointer transition-colors"
+                              >
+                                {artist.name}
+                              </span>
+                            </React.Fragment>
+                          ))}
+                        </div>
                       </td>
-                      <td className="p-3 text-gray-400 hidden md:table-cell">{track.artists.map(a => a.name).join(', ')}</td>
+                      <td className="p-3 text-gray-400 hidden md:table-cell">
+                        {track.artists.map((artist, idx) => (
+                          <React.Fragment key={artist.id}>
+                            {idx > 0 && ', '}
+                            <span 
+                              onClick={(e) => handleArtistClick(e, artist)}
+                              className="hover:text-spotify-green hover:underline cursor-pointer transition-colors"
+                            >
+                              {artist.name}
+                            </span>
+                          </React.Fragment>
+                        ))}
+                      </td>
                       <td className="p-3 text-gray-400 text-right">{formatDuration(track.duration_ms)}</td>
                     </tr>
                   ))}

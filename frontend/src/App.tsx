@@ -3,8 +3,9 @@ import SearchBar from './components/SearchBar';
 import SearchResults from './components/results/SearchResults';
 import ArtistDetail from './components/ArtistDetail';
 import AlbumDetail from './components/AlbumDetail';
-import { connectSpotify, getArtistInfo, getAlbumById } from './services/spotifyApi';
-import type { SearchResults as SearchResultsType, Artist, Album } from './types/spotify';
+import TrackDetail from './components/TrackDetail';
+import { connectSpotify, getArtistInfo, getAlbumById, getTrackById } from './services/spotifyApi';
+import type { SearchResults as SearchResultsType, Artist, Album, Track } from './types/spotify';
 import { searchSpotify } from './services/spotifyApi';
 import './App.css';
 
@@ -18,6 +19,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
+  const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [searchParams, setSearchParams] = useState<{query: string, type: string}>({
     query: '',
@@ -30,8 +32,18 @@ function App() {
   const handleUrlChange = () => {
     const path = window.location.pathname;
     
+    // Check if we're viewing a track page
+    if (path.startsWith('/track/')) {
+      const trackId = path.substring('/track/'.length);
+      if (trackId) {
+        // If we don't have this track loaded, we should fetch it
+        if (!selectedTrack || selectedTrack.id !== trackId) {
+          loadTrack(trackId);
+        }
+      }
+    }
     // Check if we're viewing an album page
-    if (path.startsWith('/album/')) {
+    else if (path.startsWith('/album/')) {
       const albumId = path.substring('/album/'.length);
       if (albumId) {
         // If we don't have this album loaded, we should fetch it
@@ -52,9 +64,10 @@ function App() {
     }
     // Check if we're on a search path
     else if (path.startsWith('/search/')) {
-      // Clear selected artist and album when navigating to search
+      // Clear selected artist, album, and track when navigating to search
       setSelectedArtist(null);
       setSelectedAlbum(null);
+      setSelectedTrack(null);
       
       const searchParamsString = path.substring('/search/'.length);
       const params = new URLSearchParams(searchParamsString);
@@ -86,6 +99,7 @@ function App() {
     else if (path === '/') {
       setSelectedArtist(null);
       setSelectedAlbum(null);
+      setSelectedTrack(null);
       setSearchResults(null);
     }
   };
@@ -122,6 +136,24 @@ function App() {
     }
   };
 
+  // Add new loadTrack function
+  const loadTrack = async (trackId: string) => {
+    setDetailsLoading(true);
+    try {
+      const data = await getTrackById(trackId);
+      setSelectedTrack(data);
+      setSelectedArtist(null);
+      setSelectedAlbum(null);
+    } catch (error) {
+      console.error('Failed to load track:', error);
+      // Fallback to home page if track can't be loaded
+      window.history.pushState({}, '', '/');
+      setSelectedTrack(null);
+    } finally {
+      setDetailsLoading(false);
+    }
+  };
+
   // Initial URL parsing on component mount
   useEffect(() => {
     handleUrlChange();
@@ -139,6 +171,7 @@ function App() {
     // Clear the detail views when performing a new search
     setSelectedArtist(null);
     setSelectedAlbum(null);
+    setSelectedTrack(null);
     
     setIsLoading(true);
     
@@ -169,6 +202,7 @@ function App() {
     // Clear all states to return to home
     setSelectedArtist(null);
     setSelectedAlbum(null);
+    setSelectedTrack(null);
     setSearchResults(null);
     setSearchParams({
       query: '',
@@ -182,6 +216,7 @@ function App() {
   const handleViewArtist = (artist: Artist) => {
     setSelectedArtist(artist);
     setSelectedAlbum(null);
+    setSelectedTrack(null);
     
     // Clean URL - use a simple /artist/id pattern
     const newUrl = `/artist/${artist.id}`;
@@ -197,6 +232,7 @@ function App() {
   const handleViewAlbum = (album: Album) => {
     setSelectedAlbum(album);
     setSelectedArtist(null);
+    setSelectedTrack(null);
     
     // Clean URL - use a simple /album/id pattern
     const newUrl = `/album/${album.id}`;
@@ -209,9 +245,27 @@ function App() {
     window.scrollTo(0, 0);
   };
 
+  // Add track view handler
+  const handleViewTrack = (track: Track) => {
+    setSelectedTrack(track);
+    setSelectedAlbum(null);
+    setSelectedArtist(null);
+    
+    // Clean URL - use a simple /track/id pattern
+    const newUrl = `/track/${track.id}`;
+    window.history.pushState({ path: newUrl }, '', newUrl);
+    
+    // Load track details
+    loadTrack(track.id);
+    
+    // Scroll to top when viewing track
+    window.scrollTo(0, 0);
+  };
+
   const handleBackToSearch = () => {
     setSelectedArtist(null);
     setSelectedAlbum(null);
+    setSelectedTrack(null);
     
     // Check if we have active search params to return to
     if (searchParams.query) {
@@ -257,14 +311,25 @@ function App() {
       
       {/* Main content - full width */}
       <main className="flex-grow w-full">
-        {/* Show album detail if an album is selected */}
-        {selectedAlbum ? (
+        {/* Show track detail if a track is selected */}
+        {selectedTrack ? (
+          <div className="w-full px-4 py-8">
+            <TrackDetail 
+              track={selectedTrack} 
+              isLoading={detailsLoading}
+              onBack={handleBackToSearch} 
+              onViewArtist={handleViewArtist}
+              onViewAlbum={handleViewAlbum}
+            />
+          </div>
+        ) : selectedAlbum ? (
           <div className="w-full px-4 py-8">
             <AlbumDetail 
               album={selectedAlbum} 
               isLoading={detailsLoading}
               onBack={handleBackToSearch} 
               onViewArtist={handleViewArtist}
+              onViewTrack={handleViewTrack}
             />
           </div>
         ) : selectedArtist ? (
@@ -320,6 +385,7 @@ function App() {
                   isLoading={isLoading} 
                   onViewArtist={handleViewArtist}
                   onViewAlbum={handleViewAlbum}
+                  onViewTrack={handleViewTrack}
                 />
               </div>
             )}

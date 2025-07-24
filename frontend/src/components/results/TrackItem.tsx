@@ -5,9 +5,10 @@ interface TrackItemProps {
   track: Track;
   onViewArtist?: (artist: Artist) => void;
   onViewAlbum?: (album: Album) => void;
+  onViewTrack?: (track: Track) => void;
 }
 
-const TrackItem: React.FC<TrackItemProps> = ({ track, onViewArtist, onViewAlbum }) => {
+const TrackItem: React.FC<TrackItemProps> = ({ track, onViewArtist, onViewAlbum, onViewTrack }) => {
   // Format duration from ms to mm:ss
   const formatDuration = (ms: number) => {
     const minutes = Math.floor(ms / 60000);
@@ -27,8 +28,16 @@ const TrackItem: React.FC<TrackItemProps> = ({ track, onViewArtist, onViewAlbum 
     if (onViewAlbum) onViewAlbum(album);
   };
 
+  // Handle track click
+  const handleTrackClick = () => {
+    if (onViewTrack) onViewTrack(track);
+  };
+
   return (
-    <div className="flex items-center p-4 hover:bg-white/10 border-b border-gray-800 last:border-b-0 transition-colors group">
+    <div 
+      className="flex items-center p-4 hover:bg-white/10 border-b border-gray-800 last:border-b-0 transition-colors group cursor-pointer"
+      onClick={handleTrackClick}
+    >
       <img 
         src={track.album.images[0]?.url || '/default-album.png'} 
         alt={track.album.name} 

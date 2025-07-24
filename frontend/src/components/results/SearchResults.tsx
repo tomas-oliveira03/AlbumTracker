@@ -21,13 +21,15 @@ interface SearchResultsProps {
   isLoading: boolean;
   onViewArtist: (artist: Artist) => void;
   onViewAlbum: (album: Album) => void;
+  onViewTrack: (track: Track) => void;
 }
 
 const SearchResults: React.FC<SearchResultsProps> = ({ 
   results, 
   isLoading, 
   onViewArtist,
-  onViewAlbum
+  onViewAlbum,
+  onViewTrack
 }) => {
   // Loading state
   if (isLoading) {
@@ -90,6 +92,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                   track={track} 
                   onViewArtist={onViewArtist}
                   onViewAlbum={onViewAlbum}
+                  onViewTrack={onViewTrack}
                 />
               ))}
           </div>

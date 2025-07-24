@@ -70,6 +70,25 @@ export const getAlbumById = async (id: string) => {
   }
 };
 
+export const getTrackById = async (id: string) => {
+  try {
+    const url = `${API_BASE_URL}/track/${id}`;
+    console.log(`Fetching track details from: ${url}`);
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch track details: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log('Track details response:', data);
+    return data;
+  } catch (error) {
+    console.error('Error fetching track:', error);
+    throw error;
+  }
+};
+
 export const connectSpotify = () => {
   window.location.href = `${API_BASE_URL}/auth/spotify`;
 };
