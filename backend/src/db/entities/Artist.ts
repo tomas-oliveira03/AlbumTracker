@@ -18,7 +18,7 @@ export class Artist {
 	imageURL!: string;
 
     @Column({ type: 'jsonb' })
-	detailedData!: Record<string, any>;
+	detailedData!: SpotifyApi.SingleArtistResponse;
 
     // Relations
     @OneToMany(() => AlbumArtist, (albumArtist) => albumArtist.artist)

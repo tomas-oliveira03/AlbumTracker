@@ -20,7 +20,7 @@ export class Track {
 	externalURL!: string;
 
     @Column({ type: 'jsonb' })
-	detailedData!: Record<string, any>;
+	detailedData!: SpotifyApi.SingleTrackResponse;
 
     // Relations
     @ManyToOne(() => Album)

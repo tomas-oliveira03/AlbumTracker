@@ -2,14 +2,7 @@ import { Check, Column, Entity, OneToMany, PrimaryColumn } from "typeorm"
 import { Track } from "./Track";
 import { AlbumArtist } from "./AlbumArtist";
 
-export enum AlbumType {
-    ALBUM = 'album',
-    SINGLE = 'single',
-    COMPILATION = 'compilation'
-}
-
 @Entity()
-@Check(`"type" IN ('album', 'single', 'compilation')`)
 export class Album {
     
     @PrimaryColumn({ type: 'varchar' })
@@ -22,7 +15,7 @@ export class Album {
     totalTracks!: number;
 
     @Column({ type: 'varchar' })
-    type!: AlbumType;
+    type!: SpotifyApi.AlbumObjectSimplified['album_type']
 
     @Column({ type: 'date' })
     releaseDate!: Date;
@@ -34,7 +27,7 @@ export class Album {
 	imageURL!: string;
 
     @Column({ type: 'jsonb' })
-	detailedData!: Record<string, any>;
+	detailedData!: SpotifyApi.SingleAlbumResponse;
 
     // Relations
     @OneToMany(() => Track, (track) => track.album)

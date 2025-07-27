@@ -45,22 +45,35 @@ export async function getArtistInfo(artistId: string) {
 	}
 }
 
-export async function getAlbumsByArtist(artistId: string) {
+export async function getAllAlbumsByArtist(artistId: string) {
 	try {
-		const response = await spotifyApi.getArtistAlbums(artistId, { 
-      limit: 15,
-      include_groups: 'album'
-    });
-		return response.body.items;
-		
+		const allAlbums: SpotifyApi.AlbumObjectSimplified[] = [];
+		let offset = 0;
+		const limit = 50;
+
+		while (true) {
+			const response = await spotifyApi.getArtistAlbums(artistId, {
+				limit,
+				offset,
+				include_groups: 'album',
+			});
+
+			allAlbums.push(...response.body.items);
+
+			if (response.body.items.length < limit) break; // no more pages
+			offset += limit;
+		}
+
+		return allAlbums;
 	} catch (err) {
-		throw new Error('Failed to retrieve artist info');
+		throw new Error('Failed to retrieve artist albums');
 	}
 }
 
-export async function getArtistFullInformation(artistId: string){
+export async function getArtistFullInformation(artistId: string) {
   const artist = await getArtistInfo(artistId)
-  const albums = await getAlbumsByArtist(artistId)
+
+  const albums = await getAllAlbumsByArtist(artistId)
 
   return {
     artist: artist,
