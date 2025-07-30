@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import { treeifyError } from 'zod';
 import { logger } from '@/lib/logger';
 import { searchByAlbumSchema, searchByArtistSchema, searchByTrackSchema } from '../schemas/search';
-import { searchForAlbum, searchForArtist, searchForTrack } from '@/services/spotify-info';
+import spotifyController from '@/controller/spotify';
 
 const router = express.Router();
 
@@ -19,7 +19,7 @@ router.get('/artist', async (req: Request, res: Response) => {
         }
 
         const { name } = parseResult.data;
-        const artistsInfo = await searchForArtist(name)
+        const artistsInfo = await spotifyController.searchForArtist(name)
 
         return res.status(200).json(artistsInfo);
 
@@ -47,7 +47,7 @@ router.get('/album', async (req: Request, res: Response) => {
         }
 
         const { name } = parseResult.data;
-        const albumsInfo = await searchForAlbum(name)
+        const albumsInfo = await spotifyController.searchForAlbum(name)
 
         return res.status(200).json(albumsInfo);
 
@@ -75,7 +75,7 @@ router.get('/track', async (req: Request, res: Response) => {
         }
 
         const { name } = parseResult.data;
-        const tracksInfo = await searchForTrack(name)
+        const tracksInfo = await spotifyController.searchForTrack(name)
 
         return res.status(200).json(tracksInfo);
 

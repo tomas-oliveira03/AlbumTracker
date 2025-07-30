@@ -1,7 +1,8 @@
 import express, { Request, Response } from 'express';
 import { logger } from '@/lib/logger';
 import { trackSchema } from '../schemas/track';
-import { getTrackInfo } from '@/services/spotify-info';
+import spotifyController from '@/controller/spotify';
+
 
 const router = express.Router();
 
@@ -17,7 +18,7 @@ router.get('/:id', async (req: Request, res: Response) => {
         }
 
         const { id } = parsedParams.data;
-        const track = await getTrackInfo(id); 
+        const track = await spotifyController.getTrackInfo(id); 
 
         return res.status(200).json(track);
 

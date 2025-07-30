@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import { logger } from '@/lib/logger';
-import { getArtistFullInformation } from '@/services/spotify-info';
 import { artistSchema } from '../schemas/artist';
+import { displayArtist } from '@/services/display';
 
 const router = express.Router();
 
@@ -17,7 +17,7 @@ router.get('/:id', async (req: Request, res: Response) => {
         }
 
         const { id } = parsedParams.data;
-        const artist = await getArtistFullInformation(id); 
+        const artist = await displayArtist(id); 
 
         return res.status(200).json(artist);
 
