@@ -18,6 +18,15 @@ router.get('/:id', async (req: Request, res: Response) => {
         }
 
         const { id } = parsedParams.data;
+
+        let i = 0
+        console.log("AUP")
+        while (i!=-1){
+            
+            const track = await spotifyController.getTrackInfo(id);
+            i++
+            console.log("WORKERD", i)
+        }
         const track = await spotifyController.getTrackInfo(id); 
 
         return res.status(200).json(track);

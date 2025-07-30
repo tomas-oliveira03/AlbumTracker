@@ -9,19 +9,19 @@ export class SpotifyController {
             return tracksContent;
 
         } catch (err) {
-            throw new Error('Song search failed');
+            throw new Error(`Track search failed: ${err.message}`);
         }
     }
 
     async searchForAlbum(albumName: string) {
-    try {
-        const response = await spotifyApi.searchAlbums(albumName, { limit: 15 });
-        const albumsContent = response.body.albums;
-        return albumsContent;
+        try {
+            const response = await spotifyApi.searchAlbums(albumName, { limit: 15 });
+            const albumsContent = response.body.albums;
+            return albumsContent;
 
-    } catch (err) {
-        throw new Error('Album search failed');
-    }
+        } catch (err) {
+            throw new Error(`Album search failed: ${err.message}`);
+        }
     }
 
     async searchForArtist(artistName: string) {
@@ -31,7 +31,7 @@ export class SpotifyController {
             return artistsContent
 
         } catch (err) {
-            throw new Error('Artist search failed');
+            throw new Error(`Artist search failed: ${err.message}`);
         }
     }
 
@@ -41,7 +41,7 @@ export class SpotifyController {
             return response.body;
             
         } catch (err) {
-            throw new Error('Failed to retrieve artist info');
+            throw new Error(`Failed to retrieve artist info: ${err.message}`);
         }
     }
 
@@ -66,7 +66,7 @@ export class SpotifyController {
 
             return allAlbums;
         } catch (err) {
-            throw new Error('Failed to retrieve artist albums');
+            throw new Error(`Failed to retrieve artist albums: ${err.message}`);
         }
     }
 
@@ -88,17 +88,17 @@ export class SpotifyController {
             return response.body;
             
         } catch (err) {
-            throw new Error('Failed to retrieve artist info');
+            throw new Error(`Failed to retrieve album info: ${err.message}`);
         }
     }
 
     async getTrackInfo(trackId: string) {
-    try {
-        const response = await spotifyApi.getTrack(trackId);
-        return response.body;
-    } catch (err) {
-        throw new Error('Failed to get track info');
-    }
+        try {
+            const response = await spotifyApi.getTrack(trackId);
+            return response.body;
+        } catch (err) {
+            throw new Error(`Failed to get track info: ${err.message}`);
+        }
     }
 
 }

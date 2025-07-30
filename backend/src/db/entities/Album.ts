@@ -27,7 +27,7 @@ export class Album {
 	imageURL!: string;
 
     @Column({ type: 'jsonb' })
-	detailedData!: SpotifyApi.SingleAlbumResponse;
+	detailedData!: SpotifyApi.AlbumObjectSimplified;
 
     @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
     updatedAt!: Date;

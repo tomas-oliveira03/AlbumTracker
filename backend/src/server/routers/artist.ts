@@ -17,9 +17,9 @@ router.get('/:id', async (req: Request, res: Response) => {
         }
 
         const { id } = parsedParams.data;
-        const artist = await displayArtist(id); 
+        const artistFullInformation = await displayArtist(id); 
 
-        return res.status(200).json(artist);
+        return res.status(200).json(artistFullInformation);
 
     }
     catch (error) {

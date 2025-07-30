@@ -1,3 +1,4 @@
+import albumController from "@/controller/album";
 import artistController from "@/controller/artist";
 import spotifyController from "@/controller/spotify";
 
@@ -5,24 +6,48 @@ import spotifyController from "@/controller/spotify";
 export async function displayArtist(artistId: string) {
     try{
         const artist = await artistController.getArtist(artistId)
-        const albums = await spotifyController.getAllAlbumsByArtist(artistId)
 
-        if (artist) {
-            console.log("HAS IT")
+        // CASE 1: Artist is in DB and albums are already scanned
+        if (artist && artist.albumsScanned){
+            console.log("CASE 1 ")
+            const albums = await albumController.getAllAlbumsByArtist(artistId)
+            const albumsDetailedData = albums.map(album => album.detailedData);
+
             return {
                 artist: artist.detailedData,
-                albums: albums
+                albums: albumsDetailedData
             }
         }
-        console.log("NOP")
-        const artistInfo = await spotifyController.getArtistInfo(artistId);
+
+        // CASE 2: Artist is in DB but albums not yet scanned
+        if (artist && !artist.albumsScanned) {
+            console.log("CASE 2 ")
+            const albumsFromSpotify = await spotifyController.getAllAlbumsByArtist(artistId)
+
+            // Doesn't wait for result so the end user doesn't have to wait longer
+            albumController.addAlbumsFromArtistCascade(artistId, albumsFromSpotify)
+
+            return {
+                artist: artist.detailedData,
+                albums: albumsFromSpotify
+            }
+
+        }
+
+        console.log("CASE 3 ")
+        // CASE 3: Artist not in DB at all
+        const artistFromSpotify = await spotifyController.getArtistInfo(artistId);
+        const albumsFromSpotify = await spotifyController.getAllAlbumsByArtist(artistId)
 
         // Doesn't wait for result so the end user doesn't have to wait longer
-        artistController.addArtist(artistInfo)
+        artistController.addArtist(artistFromSpotify)
+            .then(() => {
+                albumController.addAlbumsFromArtistCascade(artistId, albumsFromSpotify)
+            })
 
-          return {
-            artist: artistInfo,
-            albums: albums
+        return {
+            artist: artistFromSpotify,
+            albums: albumsFromSpotify
         }
 
     }
@@ -30,3 +55,4 @@ export async function displayArtist(artistId: string) {
         throw new Error(`Failed to display artist information: ${err.message}`);
     }
 }
+

@@ -1,5 +1,6 @@
 import { AppDataSource } from "@/db";
 import { Artist } from "@/db/entities/Artist";
+import { DeepPartial, In } from "typeorm";
 
 
 export class ArtistController {
@@ -7,9 +8,17 @@ export class ArtistController {
     async getArtist(artistId: string) {
         const artist = await AppDataSource.getRepository(Artist).findOne({
             where: { id: artistId },
-        })
+        });
 
         return artist
+    }  
+
+    async getAllArtists(artistIds: string[]) {
+        const artists = await AppDataSource.getRepository(Artist).find({
+            where: { id: In(artistIds) },
+        });
+
+        return artists
     }  
 
     async addArtist(artist: SpotifyApi.SingleArtistResponse) {
@@ -22,8 +31,11 @@ export class ArtistController {
         });
     }   
 
-}
+    async updateArtist(artistId: string, updatedData: DeepPartial<Artist>) {
+        await AppDataSource.getRepository(Artist).update(artistId, updatedData);
+    } 
 
+}
 
 
 const artistController = new ArtistController();
