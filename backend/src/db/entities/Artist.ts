@@ -20,6 +20,14 @@ export class Artist {
     @Column({ type: 'jsonb' })
 	detailedData!: SpotifyApi.SingleArtistResponse;
 
+    // Indicates whether the artist's albums have already been fetched from the Spotify API
+    // Edge case: Artists with no albums will still be marked as scanned to avoid unnecessary future lookups.
+    @Column({ type: 'boolean', default: false })
+	albumsScanned !: boolean;
+
+    @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+    updatedAt!: Date;
+
     // Relations
     @OneToMany(() => AlbumArtist, (albumArtist) => albumArtist.artist)
     albumLinks!: AlbumArtist[];

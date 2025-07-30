@@ -29,6 +29,9 @@ export class Album {
     @Column({ type: 'jsonb' })
 	detailedData!: SpotifyApi.SingleAlbumResponse;
 
+    @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+    updatedAt!: Date;
+
     // Relations
     @OneToMany(() => Track, (track) => track.album)
     tracks!: Track[];
