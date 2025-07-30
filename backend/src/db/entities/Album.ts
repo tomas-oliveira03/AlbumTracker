@@ -15,7 +15,7 @@ export class Album {
     totalTracks!: number;
 
     @Column({ type: 'varchar' })
-    type!: SpotifyApi.AlbumObjectSimplified['album_type']
+    type!: SpotifyApi.SingleAlbumResponse['album_type']
 
     @Column({ type: 'date' })
     releaseDate!: Date;
@@ -27,7 +27,7 @@ export class Album {
 	imageURL!: string;
 
     @Column({ type: 'jsonb' })
-	detailedData!: SpotifyApi.AlbumObjectSimplified;
+	detailedData!: SpotifyApi.SingleAlbumResponse;
 
     @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
     updatedAt!: Date;

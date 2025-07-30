@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import { logger } from '@/lib/logger';
 import { albumSchema } from '../schemas/album';
 import spotifyController from '@/controller/spotify';
+import { displayAlbum } from '@/services/display';
 
 
 const router = express.Router();
@@ -18,9 +19,9 @@ router.get('/:id', async (req: Request, res: Response) => {
         }
 
         const { id } = parsedParams.data;
-        const album = await spotifyController.getAlbumInfo(id); 
+        const albumFullInformation = await displayAlbum(id)
 
-        return res.status(200).json(album);
+        return res.status(200).json(albumFullInformation);
 
     }
     catch (error) {

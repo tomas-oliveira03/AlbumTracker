@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import { logger } from '@/lib/logger';
 import { trackSchema } from '../schemas/track';
 import spotifyController from '@/controller/spotify';
+import { trackResponseToCustomTrack } from '../schemas/spotify';
 
 
 const router = express.Router();
@@ -11,25 +12,19 @@ router.get('/:id', async (req: Request, res: Response) => {
         const parsedParams = trackSchema.safeParse(req.params);
 
         if (!parsedParams.success) {
-            return res.status(400).json({
+            return res.status(400).json({ 
                 message: 'Invalid artist ID',
                 errors: parsedParams.error,
             });
         }
 
         const { id } = parsedParams.data;
+        const fullTrack = await spotifyController.getTrackInfo(id);
+        
+        const customTrackInfo = trackResponseToCustomTrack(fullTrack)
 
-        let i = 0
-        console.log("AUP")
-        while (i!=-1){
-            
-            const track = await spotifyController.getTrackInfo(id);
-            i++
-            console.log("WORKERD", i)
-        }
-        const track = await spotifyController.getTrackInfo(id); 
 
-        return res.status(200).json(track);
+        return res.status(200).json(customTrackInfo);
 
     }
     catch (error) {

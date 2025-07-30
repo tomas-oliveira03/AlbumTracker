@@ -1,5 +1,6 @@
 import { Column, Entity, ManyToOne, PrimaryColumn } from "typeorm"
 import { Album } from "./Album";
+import { SpotifyCustomTrack } from "@/server/schemas/spotify";
 
 @Entity()
 export class Track {
@@ -20,7 +21,7 @@ export class Track {
 	externalURL!: string;
 
     @Column({ type: 'jsonb' })
-	detailedData!: SpotifyApi.SingleTrackResponse;
+	detailedData!: SpotifyCustomTrack
 
     @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
     updatedAt!: Date;

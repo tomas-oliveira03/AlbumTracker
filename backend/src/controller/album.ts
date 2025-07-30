@@ -3,6 +3,8 @@ import { Album } from "@/db/entities/Album";
 import artistController from "./artist";
 import spotifyController from "./spotify";
 import { AlbumArtist } from "@/db/entities/AlbumArtist";
+import trackController from "./track";
+import { albumResponseToCustomTracks } from "@/server/schemas/spotify";
 
 export class AlbumController {
 
@@ -29,7 +31,7 @@ export class AlbumController {
         return albums;
     }  
 
-    async addAlbum(album: SpotifyApi.AlbumObjectSimplified) {
+    async addAlbum(album: SpotifyApi.SingleAlbumResponse) {
         await AppDataSource.getRepository(Album).insert({
             id: album.id,
             name: album.name,
@@ -42,7 +44,7 @@ export class AlbumController {
         });
     }   
 
-    async addAlbumCascade(album: SpotifyApi.AlbumObjectSimplified) {
+    async addAlbumCascade(album: SpotifyApi.SingleAlbumResponse) {
 
         // Check if all artists who created this album exist in the database
         const artistIds = album.artists.map(artist => artist.id);
@@ -66,10 +68,15 @@ export class AlbumController {
         }));
 
         await AppDataSource.getRepository(AlbumArtist).insert(albumArtistLinks);
+
+        const customTracksInfo = albumResponseToCustomTracks(album) 
+        await trackController.addTracks(album.id, customTracksInfo)
+
     }   
 
-    async addAlbumsFromArtistCascade(artistId: string, albums: SpotifyApi.AlbumObjectSimplified[]) {
-        for (const album of albums){
+    async addAlbumsFromArtistCascade(artistId: string, simplifiedAlbums: SpotifyApi.AlbumObjectSimplified[]) {
+        for (const simplifiedAlbum of simplifiedAlbums){
+            const album = await spotifyController.getAlbumInfo(simplifiedAlbum.id)
             await this.addAlbumCascade(album)
         }
 
