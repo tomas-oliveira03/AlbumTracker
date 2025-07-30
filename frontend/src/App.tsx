@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import SearchBar from './components/SearchBar';
 import SearchResults from './components/results/SearchResults';
 import ArtistDetail from './components/ArtistDetail';
@@ -14,6 +14,14 @@ interface ArtistDetailData {
   albums: Album[];
 }
 
+// Interface for tracking in-flight requests
+interface RequestTracking {
+  albumRequests: Record<string, boolean>;
+  trackRequests: Record<string, boolean>;
+  artistRequests: Record<string, boolean>;
+  searchRequests: Record<string, boolean>;
+}
+
 function App() {
   const [searchResults, setSearchResults] = useState<SearchResultsType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -27,6 +35,14 @@ function App() {
   });
   const [artistData, setArtistData] = useState<ArtistDetailData | null>(null);
   const [artistLoading, setArtistLoading] = useState(false);
+  
+  // Use ref to track in-flight requests to prevent duplicates
+  const inFlightRequests = useRef<RequestTracking>({
+    albumRequests: {},
+    trackRequests: {},
+    artistRequests: {},
+    searchRequests: {},
+  });
 
   // Parse URL and update state based on current location
   const handleUrlChange = () => {
@@ -82,16 +98,29 @@ function App() {
             query: name,
             type: type
           });
-          searchSpotify(name, type)
-            .then(results => {
-              setSearchResults(results);
-              setIsLoading(false);
-            })
-            .catch(error => {
-              console.error('Search failed:', error);
-              setIsLoading(false);
-            });
-          setIsLoading(true);
+          
+          // Create a request key
+          const requestKey = `${name}:${type}`;
+          
+          // Only make the request if it's not already in flight
+          if (!inFlightRequests.current.searchRequests[requestKey]) {
+            inFlightRequests.current.searchRequests[requestKey] = true;
+            
+            setIsLoading(true);
+            searchSpotify(name, type)
+              .then(results => {
+                setSearchResults(results);
+                setIsLoading(false);
+              })
+              .catch(error => {
+                console.error('Search failed:', error);
+                setIsLoading(false);
+              })
+              .finally(() => {
+                // Remove the request from tracking once complete
+                delete inFlightRequests.current.searchRequests[requestKey];
+              });
+          }
         }
       }
     }
@@ -105,6 +134,14 @@ function App() {
   };
 
   const loadArtist = async (artistId: string) => {
+    // Check if this artist request is already in flight
+    if (inFlightRequests.current.artistRequests[artistId]) {
+      return;
+    }
+    
+    // Mark this request as in flight
+    inFlightRequests.current.artistRequests[artistId] = true;
+    
     setArtistLoading(true);
     try {
       const data = await getArtistInfo(artistId);
@@ -117,10 +154,20 @@ function App() {
       setSelectedArtist(null);
     } finally {
       setArtistLoading(false);
+      // Remove from in-flight tracking
+      delete inFlightRequests.current.artistRequests[artistId];
     }
   };
 
   const loadAlbum = async (albumId: string) => {
+    // Check if this album request is already in flight
+    if (inFlightRequests.current.albumRequests[albumId]) {
+      return;
+    }
+    
+    // Mark this request as in flight
+    inFlightRequests.current.albumRequests[albumId] = true;
+    
     setDetailsLoading(true);
     try {
       const data = await getAlbumById(albumId);
@@ -133,11 +180,20 @@ function App() {
       setSelectedAlbum(null);
     } finally {
       setDetailsLoading(false);
+      // Remove from in-flight tracking
+      delete inFlightRequests.current.albumRequests[albumId];
     }
   };
 
-  // Add new loadTrack function
   const loadTrack = async (trackId: string) => {
+    // Check if this track request is already in flight
+    if (inFlightRequests.current.trackRequests[trackId]) {
+      return;
+    }
+    
+    // Mark this request as in flight
+    inFlightRequests.current.trackRequests[trackId] = true;
+    
     setDetailsLoading(true);
     try {
       const data = await getTrackById(trackId);
@@ -151,6 +207,8 @@ function App() {
       setSelectedTrack(null);
     } finally {
       setDetailsLoading(false);
+      // Remove from in-flight tracking
+      delete inFlightRequests.current.trackRequests[trackId];
     }
   };
 
@@ -173,8 +231,6 @@ function App() {
     setSelectedAlbum(null);
     setSelectedTrack(null);
     
-    setIsLoading(true);
-    
     // Update URL with search parameters in the path
     const searchParams = new URLSearchParams();
     searchParams.set('type', type);
@@ -187,13 +243,24 @@ function App() {
     // Update searchParams state when a new search is performed
     setSearchParams({ query, type });
     
-    try {
-      const results = await searchSpotify(query, type);
-      setSearchResults(results);
-    } catch (error) {
-      console.error('Search failed:', error);
-    } finally {
-      setIsLoading(false);
+    // Create a request key
+    const requestKey = `${query}:${type}`;
+    
+    // Only make the request if it's not already in flight
+    if (!inFlightRequests.current.searchRequests[requestKey]) {
+      inFlightRequests.current.searchRequests[requestKey] = true;
+      
+      setIsLoading(true);
+      try {
+        const results = await searchSpotify(query, type);
+        setSearchResults(results);
+      } catch (error) {
+        console.error('Search failed:', error);
+      } finally {
+        setIsLoading(false);
+        // Remove the request from tracking once complete
+        delete inFlightRequests.current.searchRequests[requestKey];
+      }
     }
   };
 
