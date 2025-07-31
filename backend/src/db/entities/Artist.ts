@@ -1,6 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm"
 import { AlbumArtist } from "./AlbumArtist";
-import { TrackArtist } from "./TrackArtist";
 
 @Entity()
 export class Artist {
@@ -31,7 +30,4 @@ export class Artist {
     // Relations
     @OneToMany(() => AlbumArtist, (albumArtist) => albumArtist.artist)
     albumLinks!: AlbumArtist[];
-
-    @OneToMany(() => TrackArtist, (trackArtist) => trackArtist.artist)
-    trackLinks!: TrackArtist[];
 }
