@@ -1,6 +1,8 @@
 import albumController from "@/controller/album";
 import artistController from "@/controller/artist";
 import spotifyController from "@/controller/spotify";
+import trackController from "@/controller/track";
+import { trackResponseToCustomTrack } from "@/server/schemas/spotify";
 
 
 export async function displayArtist(artistId: string) {
@@ -24,6 +26,9 @@ export async function displayArtist(artistId: string) {
 
             // Doesn't wait for result so the end user doesn't have to wait longer
             albumController.addAlbumsFromArtistCascade(artistId, albumsFromSpotify)
+                .catch((err) => {
+                    console.error("Background display artist information failed (Artist exists):", err);
+                });
 
             return {
                 artist: artist.detailedData,
@@ -41,6 +46,9 @@ export async function displayArtist(artistId: string) {
             .then(() => {
                 albumController.addAlbumsFromArtistCascade(artistId, albumsFromSpotify)
             })
+            .catch((err) => {
+                console.error("Background display artist information failed (Artist does not exist):", err);
+            });
 
         return {
             artist: artistFromSpotify,
@@ -76,10 +84,48 @@ export async function displayAlbum(albumId: string) {
             .then((albumsFromSpotify) => {
                 albumController.addAlbumsFromArtistCascade(firstArtistId, albumsFromSpotify)
             })
+            .catch((err) => {
+                console.error("Background display album information failed:", err);
+            });
 
         return albumFromSpotify
     }
     catch (err) {
         throw new Error(`Failed to display album information: ${err.message}`);
+    }
+}
+
+
+export async function displayTrack(trackId: string) {
+    try{
+        const track = await trackController.getTrack(trackId)
+
+        // CASE 1: Track is in DB
+        if (track){
+            return track.detailedData
+        }
+
+        // CASE 2: Album is not in DB
+        const trackFromSpotify = await spotifyController.getTrackInfo(trackId)
+        const firstArtistId = trackFromSpotify.album.artists[0]?.id
+
+        if (!firstArtistId){
+            throw new Error(`Failed to display track information (First artist).`);
+        }
+
+        // Doesn't wait for result so the end user doesn't have to wait longer
+        spotifyController.getAllAlbumsByArtist(firstArtistId)
+            .then((albumsFromSpotify) => {
+                albumController.addAlbumsFromArtistCascade(firstArtistId, albumsFromSpotify)
+            })
+            .catch((err) => {
+                console.error("Background display track information failed:", err);
+            });
+
+        const customTrackInfo = trackResponseToCustomTrack(trackFromSpotify)
+        return customTrackInfo
+    }
+    catch (err) {
+        throw new Error(`Failed to display track information: ${err.message}`);
     }
 }

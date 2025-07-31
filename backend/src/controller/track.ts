@@ -13,6 +13,11 @@ export class TrackController {
     }  
 
     async addTrack(albumId: string, track: SpotifyCustomTrack) {
+        const trackExists = await this.getTrack(track.id)
+        if(trackExists){
+            return
+        }
+
         await AppDataSource.getRepository(Track).insert({
             id: track.id,
             albumId: albumId,
@@ -33,10 +38,8 @@ export class TrackController {
             detailedData: track
         }));
 
-        await AppDataSource.getRepository(Track).insert(trackEntities);
+        await AppDataSource.getRepository(Track).upsert(trackEntities, ["id"]);
     }
-
-
 
 }
 

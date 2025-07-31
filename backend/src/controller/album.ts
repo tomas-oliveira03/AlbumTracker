@@ -32,6 +32,11 @@ export class AlbumController {
     }  
 
     async addAlbum(album: SpotifyApi.SingleAlbumResponse) {
+        const albumExists = await this.getAlbum(album.id)
+        if(albumExists){
+            return
+        }
+
         await AppDataSource.getRepository(Album).insert({
             id: album.id,
             name: album.name,
@@ -42,6 +47,10 @@ export class AlbumController {
             imageURL: album.images[0]?.url || '',
             detailedData: album
         });
+    }   
+
+    async addAlbumArtistLinks( albumArtistLinks: { albumId: string;artistId: string }[]) {
+        await AppDataSource.getRepository(AlbumArtist).upsert(albumArtistLinks, ["albumId", "artistId"]);
     }   
 
     async addAlbumCascade(album: SpotifyApi.SingleAlbumResponse) {
@@ -67,7 +76,7 @@ export class AlbumController {
             artistId: artist.id
         }));
 
-        await AppDataSource.getRepository(AlbumArtist).insert(albumArtistLinks);
+        await this.addAlbumArtistLinks(albumArtistLinks)
 
         const customTracksInfo = albumResponseToCustomTracks(album) 
         await trackController.addTracks(album.id, customTracksInfo)
@@ -83,10 +92,8 @@ export class AlbumController {
         await artistController.updateArtist(artistId, {
             albumsScanned: true
         })
-        
     }  
 }
-
 
 
 const albumController = new AlbumController();

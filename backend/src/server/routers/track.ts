@@ -3,6 +3,7 @@ import { logger } from '@/lib/logger';
 import { trackSchema } from '../schemas/track';
 import spotifyController from '@/controller/spotify';
 import { trackResponseToCustomTrack } from '../schemas/spotify';
+import { displayTrack } from '@/services/display';
 
 
 const router = express.Router();
@@ -19,12 +20,9 @@ router.get('/:id', async (req: Request, res: Response) => {
         }
 
         const { id } = parsedParams.data;
-        const fullTrack = await spotifyController.getTrackInfo(id);
-        
-        const customTrackInfo = trackResponseToCustomTrack(fullTrack)
+        const trackFullInformation = await displayTrack(id)
 
-
-        return res.status(200).json(customTrackInfo);
+        return res.status(200).json(trackFullInformation);
 
     }
     catch (error) {

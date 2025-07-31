@@ -22,6 +22,11 @@ export class ArtistController {
     }  
 
     async addArtist(artist: SpotifyApi.SingleArtistResponse) {
+        const artistExists = await this.getArtist(artist.id)
+        if(artistExists){
+            return
+        }
+
         await AppDataSource.getRepository(Artist).insert({
             id: artist.id,
             name: artist.name,
