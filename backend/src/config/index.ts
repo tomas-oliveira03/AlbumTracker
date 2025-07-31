@@ -33,6 +33,10 @@ class Envs {
 	public readonly SPOTIFY_CLIENT_SECRET: string = this.getString('SPOTIFY_CLIENT_SECRET', '');
 	public readonly SPOTIFY_REDIRECT_URI: string = this.getString('SPOTIFY_REDIRECT_URI', '');
 	
+	public readonly GOOGLE_CLIENT_ID: string = this.getString('GOOGLE_CLIENT_ID', '');
+	public readonly GOOGLE_CLIENT_SECRET: string = this.getString('GOOGLE_CLIENT_SECRET', '');
+	public readonly JWT_SECRET: string = this.getString('JWT_SECRET', '');
+	public readonly BACKEND_URL: string = this.getString('BACKEND_URL', 'http://localhost:3001');
 
 	private constructor() {
 		if (this.NODE_ENV === EnvName.LOCAL) {
