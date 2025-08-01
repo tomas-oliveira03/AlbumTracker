@@ -4,6 +4,8 @@ import SearchResults from './components/results/SearchResults';
 import ArtistDetail from './components/ArtistDetail';
 import AlbumDetail from './components/AlbumDetail';
 import TrackDetail from './components/TrackDetail';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import { connectSpotify, getArtistInfo, getAlbumById, getTrackById } from './services/spotifyApi';
 import type { SearchResults as SearchResultsType, Artist, Album, Track } from './types/spotify';
 import { searchSpotify } from './services/spotifyApi';
@@ -47,6 +49,11 @@ function App() {
   // Parse URL and update state based on current location
   const handleUrlChange = () => {
     const path = window.location.pathname;
+    
+    // Check if we're on a login or register page
+    if (path === '/login' || path === '/register') {
+      return;
+    }
     
     // Check if we're viewing a track page
     if (path.startsWith('/track/')) {
@@ -349,6 +356,30 @@ function App() {
     }
   };
 
+  // Navigate to login page
+  const handleLoginClick = () => {
+    window.history.pushState({}, '', '/login');
+    window.location.reload();
+  };
+
+  // Navigate to register page
+  const handleRegisterClick = () => {
+    window.history.pushState({}, '', '/register');
+    window.location.reload();
+  };
+
+  // Check if we're on login or register page
+  const isAuthPage = window.location.pathname === '/login' || window.location.pathname === '/register';
+
+  // Render appropriate content based on the current path
+  if (window.location.pathname === '/login') {
+    return <LoginPage />;
+  }
+  
+  if (window.location.pathname === '/register') {
+    return <RegisterPage />;
+  }
+
   return (
     <div className="flex flex-col min-h-screen w-full bg-gradient-to-b from-gray-900 via-gray-800 to-black text-white">
       {/* Header with blurred background effect - full width */}
@@ -367,12 +398,20 @@ function App() {
               initialType={searchParams.type}
             />
           </div>
-          <button 
-            onClick={connectSpotify}
-            className="whitespace-nowrap bg-spotify-green hover:bg-green-500 text-white py-2 px-6 rounded-full transition-all transform hover:scale-105 font-medium"
-          >
-            Connect Spotify
-          </button>
+          <div className="flex space-x-3">
+            <button 
+              onClick={handleLoginClick}
+              className="whitespace-nowrap bg-transparent border border-gray-700 hover:border-white text-white py-2 px-6 rounded-full transition-all"
+            >
+              Login
+            </button>
+            <button 
+              onClick={handleRegisterClick}
+              className="whitespace-nowrap bg-spotify-green hover:bg-green-500 text-white py-2 px-6 rounded-full transition-all transform hover:scale-105 font-medium"
+            >
+              Register
+            </button>
+          </div>
         </div>
       </header>
       
@@ -424,20 +463,21 @@ function App() {
                     Track Your Music Journey
                   </h1>
                   <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-12 leading-relaxed">
-                    Discover new music, keep track of albums you've listened to, and connect with Spotify to sync your listening history.
+                    Discover new music, keep track of albums you've listened to, and sync your listening history.
                   </p>
                   
                   <div className="flex flex-wrap justify-center gap-4">
                     <button 
-                      onClick={connectSpotify}
-                      className="bg-spotify-green hover:bg-green-500 text-white py-3 px-8 rounded-full transition-all transform hover:scale-105 text-lg font-medium"
+                      onClick={handleLoginClick}
+                      className="bg-transparent border border-white/30 hover:border-white text-white py-3 px-8 rounded-full transition-all text-lg font-medium"
                     >
-                      Connect with Spotify
+                      Login
                     </button>
                     <button 
-                      className="bg-white/10 hover:bg-white/20 text-white py-3 px-8 rounded-full border border-white/20 transition-all"
+                      onClick={handleRegisterClick}
+                      className="bg-spotify-green hover:bg-green-500 text-white py-3 px-8 rounded-full transition-all transform hover:scale-105 text-lg font-medium"
                     >
-                      Browse Albums
+                      Register
                     </button>
                   </div>
                 </div>

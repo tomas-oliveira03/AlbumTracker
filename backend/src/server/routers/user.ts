@@ -31,7 +31,6 @@ router.post('/register', async (req: Request, res: Response) => {
                 message: error.message
             });
         }
-
         logger.error('Registration error', error);
         return res.status(500).json({
             message: 'Internal server error',

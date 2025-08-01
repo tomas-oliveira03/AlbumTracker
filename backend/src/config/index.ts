@@ -35,7 +35,7 @@ class Envs {
 	
 	public readonly GOOGLE_CLIENT_ID: string = this.getString('GOOGLE_CLIENT_ID', '');
 	public readonly GOOGLE_CLIENT_SECRET: string = this.getString('GOOGLE_CLIENT_SECRET', '');
-	public readonly JWT_SECRET: string = this.getString('JWT_SECRET', '');
+	public readonly JWT_SECRET: string = this.getString('JWT_SECRET', 'your_secret');
 	public readonly BACKEND_URL: string = this.getString('BACKEND_URL', 'http://localhost:3001');
 
 	private constructor() {
