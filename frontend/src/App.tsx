@@ -6,6 +6,7 @@ import AlbumDetail from './components/AlbumDetail';
 import TrackDetail from './components/TrackDetail';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import UserProfilePage from './pages/UserProfilePage';
 import { getArtistInfo, getAlbumById, getTrackById } from './services/spotifyApi';
 import { isAuthenticated, getStoredUser, logout, type User as AuthUser } from './services/authApi';
 import type { SearchResults as SearchResultsType, Artist, Album, Track } from './types/spotify';
@@ -391,6 +392,12 @@ function App() {
     window.location.reload();
   };
 
+  // Navigate to profile page
+  const handleProfileClick = () => {
+    window.history.pushState({}, '', '/profile');
+    window.location.reload();
+  };
+
   // Handle logout
   const handleLogout = () => {
     logout();
@@ -406,6 +413,10 @@ function App() {
   
   if (window.location.pathname === '/register') {
     return <RegisterPage />;
+  }
+  
+  if (window.location.pathname === '/profile') {
+    return <UserProfilePage />;
   }
 
   return (
@@ -429,7 +440,10 @@ function App() {
           <div className="flex space-x-3">
             {isLoggedIn ? (
               <div className="flex items-center space-x-3">
-                <span className="text-gray-300">
+                <span 
+                  className="text-gray-300 hover:text-white cursor-pointer transition-colors"
+                  onClick={handleProfileClick}
+                >
                   {currentUser?.displayName || 'User'}
                 </span>
                 <button 
