@@ -72,11 +72,12 @@ router.post('/login', async (req: Request, res: Response) => {
 });
 
 // Logout endpoint
-router.post('/logout', authMiddleware, async (req: Request, res: Response) => {
+router.post('/logout', (req: Request, res: Response) => {
     try {
-        const result = await userController.logoutUser(res);
+        const result = userController.logoutUser(res);
         return res.status(200).json(result);
-    } catch (error) {
+    } 
+    catch (error) {
         logger.error('Logout error', error);
         return res.status(500).json({
             message: 'Internal server error',

@@ -23,7 +23,7 @@ export class UserController {
         res.clearCookie('auth_token', { path: '/' });
     }
 
-    async registerUser(userData: RegisterRequest, res: Response) {
+    async registerUser(userData: RegisterRequest, res?: Response) {
         // Check if user already exists
         const existingUser = await AppDataSource.getRepository(User).findOne({
             where: { email: userData.email }
@@ -48,18 +48,20 @@ export class UserController {
         // Generate token
         const token = createToken(newUser);
         
-        // Set auth cookie
-        this.setAuthCookie(res, token);
+        // Set auth cookie if response object is provided
+        if (res) {
+            this.setAuthCookie(res, token);
+        }
 
         // Return user data without password and token
         const { password, ...userWithoutPassword } = newUser;
         return {
             user: userWithoutPassword,
-            token // Still return token for clients that want to use it directly
+            token
         };
     }
 
-    async loginUser(credentials: LoginRequest, res: Response) {
+    async loginUser(credentials: LoginRequest, res?: Response) {
         // Find user
         const user = await AppDataSource.getRepository(User).findOne({
             where: { email: credentials.email }
@@ -78,20 +80,22 @@ export class UserController {
         // Generate token
         const token = createToken(user);
         
-        // Set auth cookie
-        this.setAuthCookie(res, token);
+        // Set auth cookie if response object is provided
+        if (res) {
+            this.setAuthCookie(res, token);
+        }
 
         // Return user data without password and token
         const { password, ...userWithoutPassword } = user;
         return {
             user: userWithoutPassword,
-            token // Still return token for clients that want to use it directly
+            token
         };
     }
     
     async logoutUser(res: Response) {
         this.clearAuthCookie(res);
-        return { success: true };
+        return { success: true, message: 'Logged out successfully' };
     }
 
     async getUserById(userId: string) {
