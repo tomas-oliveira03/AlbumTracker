@@ -6,7 +6,8 @@ import AlbumDetail from './components/AlbumDetail';
 import TrackDetail from './components/TrackDetail';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import { connectSpotify, getArtistInfo, getAlbumById, getTrackById } from './services/spotifyApi';
+import { getArtistInfo, getAlbumById, getTrackById } from './services/spotifyApi';
+import { isAuthenticated, getStoredUser, logout, type User as AuthUser } from './services/authApi';
 import type { SearchResults as SearchResultsType, Artist, Album, Track } from './types/spotify';
 import { searchSpotify } from './services/spotifyApi';
 import './App.css';
@@ -36,7 +37,11 @@ function App() {
     type: 'track,album,artist'
   });
   const [artistData, setArtistData] = useState<ArtistDetailData | null>(null);
-  const [artistLoading, setArtistLoading] = useState(false);
+  const [, setArtistLoading] = useState(false);
+  
+  // Add auth state
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   
   // Use ref to track in-flight requests to prevent duplicates
   const inFlightRequests = useRef<RequestTracking>({
@@ -45,6 +50,24 @@ function App() {
     artistRequests: {},
     searchRequests: {},
   });
+
+  // Check authentication status on component mount
+  useEffect(() => {
+    const checkAuth = () => {
+      const authenticated = isAuthenticated();
+      setIsLoggedIn(authenticated);
+      
+      if (authenticated) {
+        // Try to get user from localStorage
+        const user = getStoredUser();
+        if (user) {
+          setCurrentUser(user);
+        }
+      }
+    };
+    
+    checkAuth();
+  }, []);
 
   // Parse URL and update state based on current location
   const handleUrlChange = () => {
@@ -368,8 +391,13 @@ function App() {
     window.location.reload();
   };
 
-  // Check if we're on login or register page
-  const isAuthPage = window.location.pathname === '/login' || window.location.pathname === '/register';
+  // Handle logout
+  const handleLogout = () => {
+    logout();
+    setIsLoggedIn(false);
+    setCurrentUser(null);
+  };
+
 
   // Render appropriate content based on the current path
   if (window.location.pathname === '/login') {
@@ -399,18 +427,34 @@ function App() {
             />
           </div>
           <div className="flex space-x-3">
-            <button 
-              onClick={handleLoginClick}
-              className="whitespace-nowrap bg-transparent border border-gray-700 hover:border-white text-white py-2 px-6 rounded-full transition-all"
-            >
-              Login
-            </button>
-            <button 
-              onClick={handleRegisterClick}
-              className="whitespace-nowrap bg-spotify-green hover:bg-green-500 text-white py-2 px-6 rounded-full transition-all transform hover:scale-105 font-medium"
-            >
-              Register
-            </button>
+            {isLoggedIn ? (
+              <div className="flex items-center space-x-3">
+                <span className="text-gray-300">
+                  {currentUser?.displayName || 'User'}
+                </span>
+                <button 
+                  onClick={handleLogout}
+                  className="whitespace-nowrap bg-transparent border border-gray-700 hover:border-white text-white py-2 px-6 rounded-full transition-all"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <>
+                <button 
+                  onClick={handleLoginClick}
+                  className="whitespace-nowrap bg-transparent border border-gray-700 hover:border-white text-white py-2 px-6 rounded-full transition-all"
+                >
+                  Login
+                </button>
+                <button 
+                  onClick={handleRegisterClick}
+                  className="whitespace-nowrap bg-spotify-green hover:bg-green-500 text-white py-2 px-6 rounded-full transition-all transform hover:scale-105 font-medium"
+                >
+                  Register
+                </button>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -466,20 +510,32 @@ function App() {
                     Discover new music, keep track of albums you've listened to, and sync your listening history.
                   </p>
                   
-                  <div className="flex flex-wrap justify-center gap-4">
-                    <button 
-                      onClick={handleLoginClick}
-                      className="bg-transparent border border-white/30 hover:border-white text-white py-3 px-8 rounded-full transition-all text-lg font-medium"
-                    >
-                      Login
-                    </button>
-                    <button 
-                      onClick={handleRegisterClick}
-                      className="bg-spotify-green hover:bg-green-500 text-white py-3 px-8 rounded-full transition-all transform hover:scale-105 text-lg font-medium"
-                    >
-                      Register
-                    </button>
-                  </div>
+                  {!isLoggedIn && (
+                    <div className="flex flex-wrap justify-center gap-4">
+                      <button 
+                        onClick={handleLoginClick}
+                        className="bg-transparent border border-white/30 hover:border-white text-white py-3 px-8 rounded-full transition-all text-lg font-medium"
+                      >
+                        Login
+                      </button>
+                      <button 
+                        onClick={handleRegisterClick}
+                        className="bg-spotify-green hover:bg-green-500 text-white py-3 px-8 rounded-full transition-all transform hover:scale-105 text-lg font-medium"
+                      >
+                        Register
+                      </button>
+                    </div>
+                  )}
+                  
+                  {isLoggedIn && (
+                    <div className="flex flex-wrap justify-center gap-4">
+                      <button 
+                        className="bg-spotify-green hover:bg-green-500 text-white py-3 px-8 rounded-full transition-all transform hover:scale-105 text-lg font-medium"
+                      >
+                        Browse Music
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

@@ -1,4 +1,4 @@
-import { API_BASE_URL } from './spotifyApi';
+const API_BASE_URL = '/api';
 
 export interface User {
   id: string;
@@ -22,6 +22,77 @@ export interface RegisterRequest {
   password: string;
   displayName: string;
 }
+
+// Check if user is logged in (from cookie or localStorage)
+export const isAuthenticated = (): boolean => {
+  // Check for auth cookie
+  const cookies = document.cookie.split(';').map(cookie => cookie.trim());
+  const authCookie = cookies.find(cookie => cookie.startsWith('auth_tkeN='));
+  
+  // Also check localStorage as fallback
+  const token = localStorage.getItem('token');
+  
+  return !!authCookie || !!token;
+};
+
+// Get the authentication token (from cookie or localStorage)
+export const getAuthToken = (): string | null => {
+  // First try to get from cookie
+  const cookies = document.cookie.split(';').map(cookie => cookie.trim());
+  const authCookie = cookies.find(cookie => cookie.startsWith('auth_tkeN='));
+  
+  if (authCookie) {
+    return authCookie.split('=')[1];
+  }
+  
+  // Fallback to localStorage
+  return localStorage.getItem('token');
+};
+
+// Get the current user from localStorage
+export const getStoredUser = (): User | null => {
+  const userJson = localStorage.getItem('user');
+  if (userJson) {
+    try {
+      return JSON.parse(userJson);
+    } catch {
+      return null;
+    }
+  }
+  return null;
+};
+
+// Log out function
+export const logout = async (): Promise<void> => {
+  try {
+    // Get the auth token
+    const token = getAuthToken();
+    
+    // Call the server logout endpoint
+    if (token) {
+      await fetch(`${API_BASE_URL}/user/logout`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+    }
+  } catch (error) {
+    console.error('Error during logout:', error);
+    // Continue with client-side logout even if server call fails
+  } finally {
+    // Clear localStorage
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    
+    // Clear cookie (by setting expiration in the past)
+    document.cookie = 'auth_tkeN=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    
+    // Reload the page to reset state
+    window.location.href = '/';
+  }
+};
 
 export const login = async (credentials: LoginRequest): Promise<AuthResponse> => {
   const response = await fetch(`${API_BASE_URL}/user/login`, {
