@@ -4,9 +4,26 @@ import { createToken } from "@/lib/jwt";
 import BenignError from "@/server/errors/benign-error";
 import { LoginRequest, RegisterRequest } from "@/server/schemas/auth";
 import bcrypt from "bcrypt";
+import { Response } from "express";
+import { envs } from "@/config";
 
 export class UserController {
-    async registerUser(userData: RegisterRequest) {
+    setAuthCookie(res: Response, token: string) {
+        // Set HTTP-only cookie that can't be accessed by JavaScript
+        res.cookie('auth_token', token, {
+            httpOnly: true,
+            secure: !envs.isLocal, // Use secure cookies in production
+            sameSite: 'lax',       // Restrict cookie to same site
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+            path: '/'
+        });
+    }
+    
+    clearAuthCookie(res: Response) {
+        res.clearCookie('auth_token', { path: '/' });
+    }
+
+    async registerUser(userData: RegisterRequest, res: Response) {
         // Check if user already exists
         const existingUser = await AppDataSource.getRepository(User).findOne({
             where: { email: userData.email }
@@ -30,16 +47,19 @@ export class UserController {
 
         // Generate token
         const token = createToken(newUser);
+        
+        // Set auth cookie
+        this.setAuthCookie(res, token);
 
         // Return user data without password and token
         const { password, ...userWithoutPassword } = newUser;
         return {
             user: userWithoutPassword,
-            token
+            token // Still return token for clients that want to use it directly
         };
     }
 
-    async loginUser(credentials: LoginRequest) {
+    async loginUser(credentials: LoginRequest, res: Response) {
         // Find user
         const user = await AppDataSource.getRepository(User).findOne({
             where: { email: credentials.email }
@@ -57,13 +77,21 @@ export class UserController {
 
         // Generate token
         const token = createToken(user);
+        
+        // Set auth cookie
+        this.setAuthCookie(res, token);
 
         // Return user data without password and token
         const { password, ...userWithoutPassword } = user;
         return {
             user: userWithoutPassword,
-            token
+            token // Still return token for clients that want to use it directly
         };
+    }
+    
+    async logoutUser(res: Response) {
+        this.clearAuthCookie(res);
+        return { success: true };
     }
 
     async getUserById(userId: string) {

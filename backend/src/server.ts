@@ -3,6 +3,7 @@ import { envs } from "./config";
 import { logger } from "./lib/logger";
 import apiRouter from "./server/routers";
 import { appInitialization } from "./helpers/initialize";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
@@ -21,6 +22,9 @@ const startServer = async () => {
 
     // Middleware to parse JSON
     app.use(express.json());
+    
+    // Add cookie parser middleware
+    app.use(cookieParser());
 
     // Mount API routes
     app.use('/api', apiRouter);

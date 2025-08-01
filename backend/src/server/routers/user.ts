@@ -21,7 +21,7 @@ router.post('/register', async (req: Request, res: Response) => {
         }
 
         const userData = parseResult.data;
-        const result = await userController.registerUser(userData);
+        const result = await userController.registerUser(userData, res);
 
         return res.status(200).json(result);
     } 
@@ -52,7 +52,7 @@ router.post('/login', async (req: Request, res: Response) => {
         }
 
         const credentials = parseResult.data;
-        const result = await userController.loginUser(credentials);
+        const result = await userController.loginUser(credentials, res);
 
         return res.status(200).json(result);
     } 
@@ -64,6 +64,20 @@ router.post('/login', async (req: Request, res: Response) => {
         }
 
         logger.error('Login error', error);
+        return res.status(500).json({
+            message: 'Internal server error',
+            error: error.message
+        });
+    }
+});
+
+// Logout endpoint
+router.post('/logout', authMiddleware, async (req: Request, res: Response) => {
+    try {
+        const result = await userController.logoutUser(res);
+        return res.status(200).json(result);
+    } catch (error) {
+        logger.error('Logout error', error);
         return res.status(500).json({
             message: 'Internal server error',
             error: error.message
